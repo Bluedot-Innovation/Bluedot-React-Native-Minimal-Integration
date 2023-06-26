@@ -15,7 +15,7 @@ export default function GeoTriggering() {
   const allowsBackgroundLocationUpdatesString = "allowsBackgroundLocationUpdates";
   const toggleSwitch = async (value) => {
     setIsBackgroundLocationUpdatesEnabled(value);
-    BluedotPointSdk.allowsBackgroundLocationUpdates(value);
+    BluedotPointSdk.backgroundLocationAccessForWhileUsing(value);
     try {
     await AsyncStorage.setItem(allowsBackgroundLocationUpdatesString, value.toString());
     } catch (e) {
@@ -33,7 +33,7 @@ export default function GeoTriggering() {
 
     const retrieveBackgroundLocationStatus = async () => {
       try {
-        const isBackgroundLocationUpdatesAllowed = ((await AsyncStorage.getItem(allowsBackgroundLocationUpdatesString) || 'false') === 'true')
+        const isBackgroundLocationUpdatesAllowed = ((await AsyncStorage.getItem(allowsBackgroundLocationUpdatesString) || BluedotPointSdk.backgroundLocationAccessForWhileUsing) === 'true')
         if(isBackgroundLocationUpdatesAllowed !== null) {
           setIsBackgroundLocationUpdatesEnabled(isBackgroundLocationUpdatesAllowed);
         }

@@ -37,15 +37,31 @@ export default function Initialize() {
     BluedotPointSdk.on("enterZone", (event) => {
       const message = `You have checked in ${event.zoneInfo.name}`;
       sendLocalNotification(message);
+      console.log(`entered: ${JSON.stringify(event)}`);
+      
+      // Test querying CustomEventMetaData
+      BluedotPointSdk.getCustomEventMetaData().then((metadata) => {
+        const message = `on Entered, CustomEventMetaData: ${JSON.stringify(metadata)}`;
+        console.log(message);
+        console.log(JSON.stringify(metadata))
+      });
     });
 
     BluedotPointSdk.on("exitZone", (event) => {
       const message = `You have checked-out from ${event.zoneInfo.name}`;
       sendLocalNotification(message);
+      console.log(`exited: ${JSON.stringify(event)}`);
     });
 
     BluedotPointSdk.on("zoneInfoUpdate", () => {
-      BluedotPointSdk.getZonesAndFences()
+      // zoneInfoUpdate callback no longer returns zoneInfos, query it directly from the SDK
+      BluedotPointSdk.getZonesAndFences().then((zoneInfos) => {
+        if (zoneInfos != null) {
+          const message = `Did Update ZoneInfo ${JSON.stringify(zoneInfos)}`;
+          console.log(message);
+          console.log(JSON.stringify(zoneInfos))
+        }
+      });
     });
 
     BluedotPointSdk.on(

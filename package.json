@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "3.0.0",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -13,7 +13,7 @@
     "@react-native-community/push-notification-ios": "^1.10.1",
     "appcenter": "4.4.5",
     "appcenter-crashes": "4.4.5",
-    "bluedot-react-native": "~2.3.0",
+    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#dev/3.0.0-sdk16",
     "expo": "^48.0.0",
     "expo-splash-screen": "~0.17.5",
     "expo-status-bar": "~1.4.2",

@@ -25,7 +25,6 @@ export default function Main() {
     });
 
     BluedotPointSdk.unsubscribe("zoneInfoUpdate", () => {
-      console.log()
     });
 
     BluedotPointSdk.unsubscribe(

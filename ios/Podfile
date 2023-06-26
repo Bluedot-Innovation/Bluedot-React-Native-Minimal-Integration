@@ -69,13 +69,6 @@ target 'RNPointSDKMinimalIntegration' do
     )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
-    # Workaround for issue `building for iOS Simulator-x86_64 but attempting to link with file built for iOS Simulator-arm64`
-    # when running on Apple M1 Simulators
-    # Reference: https://stackoverflow.com/a/63955114
-    installer.pods_project.build_configurations.each do |config|
-      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
-    end
-
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
     installer.target_installation_results.pod_target_installation_results
