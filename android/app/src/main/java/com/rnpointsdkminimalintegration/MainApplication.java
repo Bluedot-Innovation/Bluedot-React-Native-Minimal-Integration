@@ -1,5 +1,7 @@
 package com.rnpointsdkminimalintegration;
 
+import static com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost;
+
 import android.content.res.Configuration;
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
@@ -53,7 +55,7 @@ public class MainApplication extends Application implements ReactApplication {
 
   @Override
   public ReactHost getReactHost() {
-      return ReactNativeHostWrapper.createReactHost(this, mReactNativeHost);
+    return getDefaultReactHost(this, mReactNativeHost);
   }
 
   @NonNull
