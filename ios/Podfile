@@ -13,7 +13,7 @@ $RNFirebaseAsStaticFramework = true
 
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 
-platform :ios, '14.0'
+platform :ios, '15.6'
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
