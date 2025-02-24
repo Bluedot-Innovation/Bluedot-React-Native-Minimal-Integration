@@ -27,6 +27,11 @@ export default function Main() {
     BluedotPointSdk.unsubscribe("zoneInfoUpdate", () => {
     });
 
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_TEXT_RESPONSE, () => {});
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_CONTEXT_RESPONSE, () => {});
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_IDENTIFIER_RESPONSE, () => {});
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_ERROR, () => {});
+
     BluedotPointSdk.unsubscribe(
       "lowPowerModeDidChange",
       (event) => console.log(JSON.stringify(event))

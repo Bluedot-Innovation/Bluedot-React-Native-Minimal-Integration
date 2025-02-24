@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, Button, Text, FlatList, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, Dimensions, SafeAreaView } from "react-native";
 import { useNavigate } from "react-router-native";
 import { BackHandler } from "react-native";
-import BluedotPointSDK from "bluedot-react-native";
+import BluedotPointSdk from "bluedot-react-native";
 
 class ChatMessage {
   constructor(id, text, user) {
@@ -24,7 +24,7 @@ export default function BrainAiScreen() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [chatSessionId, setsetChatSessionId] = useState("");
   const navigate = useNavigate();
-  const brainAi = new BluedotPointSDK.BrainAi();
+  const brainAi = new BluedotPointSdk.BrainAi();
 
   useEffect(() => {
     const backAction = () => {
@@ -57,8 +57,17 @@ export default function BrainAiScreen() {
   }, []);
 
   const registerBrainAiListeners = () => {
-    BluedotPointSdk.on(BrainAi.BRAIN_EVENT_TEXT_RESPONSE, (event) => {
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE, (event) => {
       console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event);
+    });
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_CONTEXT_RESPONSE, (event) => {
+      console.log("BRAIN_EVENT_CONTEXT_RESPONSE: "+event);
+    });
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_IDENTIFIER_RESPONSE, (event) => {
+      console.log("BRAIN_EVENT_IDENTIFIER_RESPONSE: "+event);
+    });
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_ERROR, (event) => {
+      console.log("BRAIN_EVENT_ERROR: "+event);
     });
   };
 
@@ -99,14 +108,6 @@ export default function BrainAiScreen() {
       )
     );
   };
-
-  function onCreateChatSuccess(chatSessionId) {
-    console.log('react create chat success: '+chatSessionId);
-  }
-  
-  function onCreateChatError(error) {
-    console.error('Error Starting Tempo: ', error);
-  }
 
   const { width } = Dimensions.get("window");
 
