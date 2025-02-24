@@ -22,6 +22,7 @@ export default function BrainAiScreen() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [chatSessionId, setsetChatSessionId] = useState("");
   const navigate = useNavigate();
   const brainAi = new BluedotPointSDK.BrainAi();
 
@@ -43,21 +44,43 @@ export default function BrainAiScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    BluedotPointSdk.isInitialized().then((isInitialized) => {
+      if (isInitialized) {
+        console.log("Initialize BrainAi");
+        registerBrainAiListeners();
+        brainAi.createNewChat().then(setsetChatSessionId);
+      } else {
+        console.log("Error: Bluedot SDK not initialized!");
+      }
+    });
+  }, []);
+
+  const registerBrainAiListeners = () => {
+    BluedotPointSdk.on(BrainAi.BRAIN_EVENT_TEXT_RESPONSE, (event) => {
+      console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event);
+    });
+  };
+
   const sendMessage = () => {
-    const onSuccessCallback = (chatSessionId) => {
-      console.log("brain success: "+chatSessionId);
-    }
-    const onFailCallback = (error) => {
-      console.log("brain fail");
-    }
-    brainAi.createNewChat(onSuccessCallback, onFailCallback);
-    // brainAi.testLog(onSuccessCallback, onFailCallback);
-
-
+    // const onPartialTextResponse = (partialResponse) => {
+    //   console.log("onPartialTextResponse: "+partialResponse);
+    // }
+    // const onContextResponse = (contextResponse) => {
+    //   console.log("onContextResponse: "+contextResponse);
+    // }
+    // const onIdentifierResponse = (identifierResponse) => {
+    //   console.log("onIdentifierResponse: "+identifierResponse);
+    // }
+    // const onError = (error) => {
+    //   console.log("onError: "+error);
+    // }
+    
 
     if (inputText.trim()) {
       setMessages([...messages, new ChatMessage(Date.now(), inputText, true)]);
       setInputText("");
+      brainAi.sendMessage(chatSessionId, inputText);
     }
   };
 
