@@ -58,16 +58,16 @@ export default function BrainAiScreen() {
 
   const registerBrainAiListeners = () => {
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE, (event) => {
-      console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event);
+      console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
     });
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_CONTEXT_RESPONSE, (event) => {
-      console.log("BRAIN_EVENT_CONTEXT_RESPONSE: "+event);
+      console.log("BRAIN_EVENT_CONTEXT_RESPONSE: "+event.brainEventContextResponse.length);
     });
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_IDENTIFIER_RESPONSE, (event) => {
-      console.log("BRAIN_EVENT_IDENTIFIER_RESPONSE: "+event);
+      console.log("BRAIN_EVENT_IDENTIFIER_RESPONSE: "+event.brainEventIdentifierResponse);
     });
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_ERROR, (event) => {
-      console.log("BRAIN_EVENT_ERROR: "+event);
+      console.log("BRAIN_EVENT_ERROR: "+event.brainEventError);
     });
   };
 
