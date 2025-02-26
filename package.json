@@ -20,7 +20,7 @@
     "@react-native/metro-config": "0.77.0",
     "appcenter": "^5.0.1",
     "appcenter-crashes": "^5.0.1",
-    "bluedot-react-native": "file:../Bluedot-React-Native-Plugin/bluedot-react-native-3.2.14.tgz",
+    "bluedot-react-native": "file:../Bluedot-React-Native-Plugin/bluedot-react-native-3.2.17.tgz",
     "expo": "^52.0.35",
     "expo-application": "^5.9.1",
     "expo-constants": "~16.0.2",
@@ -41,6 +41,7 @@
     "react-native-web": "~0.19.6",
     "react-router-dom": "~6.3.0",
     "react-router-native": "~6.3.0",
+    "react-native-render-html": "6.3.4",
     "upgrade": "^1.1.0"
   },
   "devDependencies": {

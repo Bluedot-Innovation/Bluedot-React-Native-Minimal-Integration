@@ -3,6 +3,8 @@ import { View, TextInput, Button, Text, FlatList, TouchableOpacity, StyleSheet, 
 import { useNavigate } from "react-router-native";
 import { BackHandler } from "react-native";
 import BluedotPointSdk from "bluedot-react-native";
+import RenderHTML from 'react-native-render-html';
+import { useWindowDimensions } from 'react-native';
 
 class ChatMessage {
   constructor(id, text, user) {
@@ -25,15 +27,20 @@ export default function BrainAiScreen() {
   const navigate = useNavigate();
   const brainAi = new BluedotPointSdk.BrainAi();
   const botMessageRef = useRef(null);
+  const chatSessionIdRef = useRef("");
 
   useEffect(() => {
     const backAction = () => {
-      navigate("/main");
+      onBackAction();
       return true;
     };
     const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
     return () => backHandler.remove();
   }, [navigate]);
+
+  useEffect(() => {
+    chatSessionIdRef.current = chatSessionId;
+  }, [chatSessionId]);
 
   useEffect(() => {
     const showListener = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
@@ -47,17 +54,25 @@ export default function BrainAiScreen() {
   useEffect(() => {
     BluedotPointSdk.isInitialized().then((isInitialized) => {
       if (isInitialized) {
-        console.log("Initialize BrainAi");
-        registerBrainAiListeners();
-        brainAi.createNewChat().then(setChatSessionId);
+        brainAi.createNewChat().then((sessionId) => {
+          setChatSessionId(sessionId);
+          registerBrainAiListeners(chatSessionId);
+        });
       } else {
         console.log("Error: Bluedot SDK not initialized!");
       }
     });
   }, []);
 
-  const registerBrainAiListeners = () => {
-    BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE, (event) => {
+  const onBackAction = () => {
+    brainAi.closeChat(chatSessionIdRef.current);
+    unregisterBrainAiListeners(chatSessionIdRef.current);
+    navigate("/");
+  };
+
+  const registerBrainAiListeners = (chatSessionId) => {
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, (event) => {
+      console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
       setMessages(prevMessages => {
         return prevMessages.map(msg => {
           if (msg.isBot && msg.id === botMessageRef.current?.id) {
@@ -68,18 +83,29 @@ export default function BrainAiScreen() {
       });
     });
 
-    BluedotPointSdk.on(brainAi.BRAIN_EVENT_CONTEXT_RESPONSE, (event) => {
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_CONTEXT_RESPONSE+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_CONTEXT_RESPONSE: " + event.brainEventContextResponse.length);
     });
 
-    BluedotPointSdk.on(brainAi.BRAIN_EVENT_IDENTIFIER_RESPONSE, () => {
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId, () => {
       botMessageRef.current = null;
     });
 
-    BluedotPointSdk.on(brainAi.BRAIN_EVENT_ERROR, (event) => {
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_ERROR+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_ERROR: " + event.brainEventError);
     });
+
+    brainAi.getChatSessionIDs().then((chatSessionIDs) => {
+      console.log("chat session IDs: "+chatSessionIDs);
+    });
   };
+
+  const unregisterBrainAiListeners = (chatSessionId) => {
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, () => {});
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_CONTEXT_RESPONSE+chatSessionId, () => {});
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_IDENTIFIER_RESPONSE+chatSessionId, () => {});
+    BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_ERROR+chatSessionId, () => {});
+  }
 
   const sendMessage = () => {
     if (inputText.trim()) {
@@ -107,22 +133,53 @@ export default function BrainAiScreen() {
     setUserScrolledUp(!isAtBottom);
   };
 
+  const { width } = useWindowDimensions();
+
+  const renderMessage = ({ item }) => {
+    const contentWidth = 300;
+    if (item.isBot) {
+      return (
+        <View
+          style={[
+            styles.messageContainer,
+            item.user ? styles.userMessage : styles.responseMessage,
+          ]}
+        >
+          <RenderHTML
+            contentWidth={contentWidth}
+            source={{ html: item.text }}
+          />
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={[
+            styles.messageContainer,
+            item.user ? styles.userMessage : styles.responseMessage,
+          ]}
+        >
+          <Text style={styles.messageText}>{item.text}</Text>
+        </View>
+      );
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.safeContainer}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
-          <TouchableOpacity onPress={() => navigate("/")} style={styles.backButton} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => {
+              onBackAction();
+            }
+          } style={styles.backButton} activeOpacity={0.7}>
             <Text style={styles.backButtonText}>Back</Text>
           </TouchableOpacity>
           <FlatList
             ref={flatListRef}
             data={messages}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={[styles.messageContainer, item.user ? styles.userMessage : styles.responseMessage]}>
-                <Text style={styles.messageText}>{item.text}</Text>
-              </View>
-            )}
+            renderItem={renderMessage}
             onScroll={handleScroll}
             onContentSizeChange={() => {
               if (!userScrolledUp) {
