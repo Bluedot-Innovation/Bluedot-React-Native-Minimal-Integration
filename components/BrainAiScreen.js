@@ -55,8 +55,9 @@ export default function BrainAiScreen() {
     BluedotPointSdk.isInitialized().then((isInitialized) => {
       if (isInitialized) {
         brainAi.createNewChat().then((sessionId) => {
+          console.log("register listeners for session: "+sessionId);
           setChatSessionId(sessionId);
-          registerBrainAiListeners(chatSessionId);
+          registerBrainAiListeners(sessionId);
         });
       } else {
         console.log("Error: Bluedot SDK not initialized!");
@@ -65,12 +66,19 @@ export default function BrainAiScreen() {
   }, []);
 
   const onBackAction = () => {
-    brainAi.closeChat(chatSessionIdRef.current);
-    unregisterBrainAiListeners(chatSessionIdRef.current);
+    brainAi.getChatSessionIDs().then((chatSessionIDs) => {
+      chatSessionIDs.forEach(element => {
+        console.log("onBackAction:unregister session: "+element);
+        brainAi.closeChat(element);
+        unregisterBrainAiListeners(element);
+      });
+    });
+    
     navigate("/");
   };
 
   const registerBrainAiListeners = (chatSessionId) => {
+    console.log("REGISTER LISTENERS: "+brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId);
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
       setMessages(prevMessages => {
@@ -94,13 +102,10 @@ export default function BrainAiScreen() {
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_ERROR+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_ERROR: " + event.brainEventError);
     });
-
-    brainAi.getChatSessionIDs().then((chatSessionIDs) => {
-      console.log("chat session IDs: "+chatSessionIDs);
-    });
   };
 
   const unregisterBrainAiListeners = (chatSessionId) => {
+    console.log("UNREGISTER LISTENERS: "+brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId);
     BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, () => {});
     BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_CONTEXT_RESPONSE+chatSessionId, () => {});
     BluedotPointSdk.unsubscribe(BluedotPointSdk.BrainAi.BRAIN_EVENT_IDENTIFIER_RESPONSE+chatSessionId, () => {});
