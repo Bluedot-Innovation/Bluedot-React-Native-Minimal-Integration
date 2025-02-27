@@ -101,6 +101,9 @@ export default function BrainAiScreen() {
 
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_ERROR+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_ERROR: " + event.brainEventError);
+      if (event.brainEventErrorCode in brainAi.errorMessages) {
+        console.log("error: "+brainAi.errorMessages[event.brainEventErrorCode]);
+      }
     });
   };
 
