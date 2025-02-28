@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-native";
 import { BackHandler } from "react-native";
 import BluedotPointSdk from "bluedot-react-native";
 import RenderHTML from 'react-native-render-html';
-import { useWindowDimensions } from 'react-native';
+import ProductGrid from "./ProductGrid";
+
+const placeholderImage = require("../assets/icon.png");
 
 class ChatMessage {
   constructor(id, text, user) {
@@ -14,6 +16,7 @@ class ChatMessage {
     this.liked = false;
     this.disliked = false;
     this.isBot = !user;
+    this.products = [];
   }
 }
 
@@ -81,6 +84,7 @@ export default function BrainAiScreen() {
     console.log("REGISTER LISTENERS: "+brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId);
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
+      console.log("BRAIN_EVENT_TEXT_RESPONSE_ID: "+event.brainEventResponseID);
       setMessages(prevMessages => {
         return prevMessages.map(msg => {
           if (msg.isBot && msg.id === botMessageRef.current?.id) {
@@ -93,6 +97,27 @@ export default function BrainAiScreen() {
 
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_CONTEXT_RESPONSE+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_CONTEXT_RESPONSE: " + event.brainEventContextResponse.length);
+
+      if (event.brainEventContextResponse.length > 0) {
+        const products = event.brainEventContextResponse.map(product => ({
+          id: product.product_id ?? product.title, // in case the id is missing
+          title: product.title,
+          price: product.price,
+          image: product.image_links?.length > 0 ? product.image_links[0] : placeholderImage,
+        }));
+
+        setMessages(prevMessages =>
+          prevMessages.map(msg => {
+            if (msg.isBot && msg.id === botMessageRef.current?.id) {
+              return { 
+                ...msg, 
+                products
+              };
+            }
+            return msg;
+          })
+        );
+      }
     });
 
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId, () => {
@@ -141,36 +166,30 @@ export default function BrainAiScreen() {
     setUserScrolledUp(!isAtBottom);
   };
 
-  const { width } = useWindowDimensions();
+  const onProductPress = (product) => {
+    console.log("Product clicked:", product);
+  };
 
-  const renderMessage = ({ item }) => {
-    const contentWidth = 300;
-    if (item.isBot) {
-      return (
-        <View
-          style={[
-            styles.messageContainer,
-            item.user ? styles.userMessage : styles.responseMessage,
-          ]}
-        >
-          <RenderHTML
-            contentWidth={contentWidth}
-            source={{ html: item.text }}
-          />
-        </View>
-      );
-    } else {
-      return (
-        <View
-          style={[
-            styles.messageContainer,
-            item.user ? styles.userMessage : styles.responseMessage,
-          ]}
-        >
+  const renderMessage = ({ item, index }) => {
+    return (
+      <View
+        style={[
+          styles.messageContainer,
+          item.user ? styles.userMessage : styles.responseMessage,
+        ]}
+      >
+        {item.isBot ? (
+          <RenderHTML contentWidth={300} source={{ html: item.text }} />
+        ) : (
           <Text style={styles.messageText}>{item.text}</Text>
-        </View>
-      );
-    }
+        )}
+  
+        {/* Attach ProductGrid to the last bot response */}
+        {index === messages.length - 1 && item.products.length > 0 && (
+          <ProductGrid products={item.products} onProductPress={onProductPress} />
+        )}
+      </View>
+    );
   };
 
   return (
