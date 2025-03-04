@@ -146,6 +146,7 @@ export default function BrainAiScreen() {
       setMessages(prev => [...prev, userMessage]);
       setInputText("");
       brainAi.sendMessage(chatSessionId, inputText);
+
       setTimeout(() => {
         const botMessage = new ChatMessage(Date.now() + 1, "...", false);
         botMessageRef.current = botMessage;
@@ -184,8 +185,7 @@ export default function BrainAiScreen() {
           <Text style={styles.messageText}>{item.text}</Text>
         )}
   
-        {/* Attach ProductGrid to the last bot response */}
-        {index === messages.length - 1 && item.products.length > 0 && (
+        {item.isBot && item.products.length > 0 && (
           <ProductGrid products={item.products} onProductPress={onProductPress} />
         )}
       </View>

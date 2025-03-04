@@ -39,9 +39,6 @@ const ProductGrid = ({ products, onProductPress }) => {
 };
 
 const styles = StyleSheet.create({
-  gridWrapper: {
-    flex: 1,
-  },
   itemContainer: {
     padding: 4, 
     alignItems: "center",
