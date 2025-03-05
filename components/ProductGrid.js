@@ -16,7 +16,7 @@ const ProductGrid = ({ products, onProductPress }) => {
 
   const renderProductItem = ({ item }) => (
     <TouchableOpacity style={[styles.itemContainer, { width: itemWidth, height: itemHeight }]} onPress={() => onProductPress(item)}>
-      <Image source={{ uri: item.image }} style={styles.productImage} />``
+      <Image source={{ uri: item.image }} style={styles.productImage} />
       <Text style={styles.productTitle} numberOfLines={2}>
         {item.title}
       </Text>
@@ -30,7 +30,7 @@ const ProductGrid = ({ products, onProductPress }) => {
         <FlatList
           data={products}
           renderItem={renderProductItem}
-          keyExtractor={(item) => item.product_id}
+          keyExtractor={(item) => item.id}
           numColumns={numColumns}
         />
       )}
@@ -39,9 +39,6 @@ const ProductGrid = ({ products, onProductPress }) => {
 };
 
 const styles = StyleSheet.create({
-  gridWrapper: {
-    flex: 1,
-  },
   itemContainer: {
     padding: 4, 
     alignItems: "center",

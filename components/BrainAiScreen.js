@@ -84,7 +84,6 @@ export default function BrainAiScreen() {
     console.log("REGISTER LISTENERS: "+brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId);
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, (event) => {
       console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
-      console.log("BRAIN_EVENT_TEXT_RESPONSE_ID: "+event.brainEventResponseID);
       setMessages(prevMessages => {
         return prevMessages.map(msg => {
           if (msg.isBot && msg.id === botMessageRef.current?.id) {
@@ -142,12 +141,15 @@ export default function BrainAiScreen() {
 
   const sendMessage = () => {
     if (inputText.trim()) {
-      const userMessage = new ChatMessage(Date.now(), inputText, true);
+      const userChatMessageId = Date.now();
+      const userMessage = new ChatMessage(userChatMessageId, inputText, true);
       setMessages(prev => [...prev, userMessage]);
       setInputText("");
       brainAi.sendMessage(chatSessionId, inputText);
+
       setTimeout(() => {
-        const botMessage = new ChatMessage(Date.now() + 1, "...", false);
+        const botChatMessageId = Date.now() + 1;
+        const botMessage = new ChatMessage(botChatMessageId, "...", false);
         botMessageRef.current = botMessage;
         setMessages(prev => [...prev, botMessage]);
       }, 100);
@@ -184,8 +186,7 @@ export default function BrainAiScreen() {
           <Text style={styles.messageText}>{item.text}</Text>
         )}
   
-        {/* Attach ProductGrid to the last bot response */}
-        {index === messages.length - 1 && item.products.length > 0 && (
+        {item.isBot && item.products.length > 0 && (
           <ProductGrid products={item.products} onProductPress={onProductPress} />
         )}
       </View>
