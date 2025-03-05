@@ -6,12 +6,12 @@ PODS:
     - AppCenter/Crashes (~> 5.0)
     - AppCenterReactNativeShared (~> 5.0)
     - React-Core
-  - AppCenter/Core (5.0.5)
-  - AppCenter/Crashes (5.0.5):
+  - AppCenter/Core (5.0.6)
+  - AppCenter/Crashes (5.0.6):
     - AppCenter/Core
-  - AppCenterReactNativeShared (5.0.2):
-    - AppCenter/Core (= 5.0.5)
-  - BluedotPointSDK (16.0.0)
+  - AppCenterReactNativeShared (5.0.3):
+    - AppCenter/Core (= 5.0.6)
+  - BluedotPointSDK (17.0.0)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - EXApplication (5.9.1):
@@ -1266,7 +1266,7 @@ PODS:
   - react-native-geolocation (2.1.0):
     - React-Core
   - react-native-plugin (3.2.21):
-    - BluedotPointSDK (= 16.0.0)
+    - BluedotPointSDK (= 17.0.0)
     - React
   - react-native-render-html (6.3.4):
     - React-Core
@@ -1942,11 +1942,11 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppCenter: 994875ea7941b9e168babb98299f900a94bcef13
+  AppCenter: 395cc12b428b8fdf12e9f92294d93a55bac389e4
   appcenter-core: 3a17ba4397c5468a9abde4172b8fe701a402ee17
   appcenter-crashes: 429d03fcff1e7ba546b5a76724a89f3db30a3014
-  AppCenterReactNativeShared: e6f6bd4d0e055bf1a3d7337edb4993bfce79185b
-  BluedotPointSDK: 2f28e12f05b24fdcd4bca5707c799d1d906b41af
+  AppCenterReactNativeShared: 6de0a156fa7cdf7162f35ae2938fa3eeaed8965a
+  BluedotPointSDK: 4653b57da588fa48bb9820287b18f53e7f79e21e
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EXApplication: ec862905fdab3a15bf6bd8ca1a99df7fc02d7762
@@ -1993,7 +1993,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 73dd1210c4ecf0dfb4e2d4e06f2a13f824a801a9
   React-microtasksnativemodule: d03753688e2abf135edcd4160ab3ce7526da8b0d
   react-native-geolocation: 2f7b974123a2240dd372c81f0bb598ca6e899952
-  react-native-plugin: fd470f458f02d345c6ef61cd4e9a9508d7c91df2
+  react-native-plugin: 7a395c6879b98d4eb1b020d428ca7f5e87ed7a07
   react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   React-nativeconfig: cb207ebba7cafce30657c7ad9f1587a8f32e4564
   React-NativeModulesApple: 8411d548b1ad9d2b3e597beb9348e715c8020e0c
