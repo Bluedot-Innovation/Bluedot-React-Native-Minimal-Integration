@@ -139,6 +139,7 @@ export default function BrainAiScreen() {
       console.log("BRAIN_EVENT_RESPONSE_ID: " + responseId);
       
       /**
+       * Response generation finished.
        * Update response id of the last BrainAi response.
        */
       setMessages(prevMessages =>
@@ -180,7 +181,8 @@ export default function BrainAiScreen() {
       brainAi.sendMessage(chatSessionId, inputText);
 
       setTimeout(() => {
-        const botChatMessageId = Date.now() + 1; // assign temporary id to the response until a real response id is returned in "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
+        const botChatMessageId = Date.now() + 1;  // assign temporary id to the response until a real response id is returned 
+                                                  // in "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
         const botMessage = new ChatMessage(botChatMessageId, "...", false);
         botMessageRef.current = botMessage;
         setMessages(prev => [...prev, botMessage]);
@@ -194,7 +196,7 @@ export default function BrainAiScreen() {
   };
 
   const onResponseFeedback = (msgId, liked) => {
-    brainAi.submitFeedback(chatSessionId, msgId, liked);  //TODO dupa console.js:614 Error: Exception in HostFunction: Expected argument 1 of method "androidSubmitFeedback" to be a string, but got a number (1741093847279.000000)
+    brainAi.submitFeedback(chatSessionId, msgId, liked);
     setMessages(prevMessages =>
       prevMessages.map(msg => {
         if (msg.isBot && msg.id === msgId) {
