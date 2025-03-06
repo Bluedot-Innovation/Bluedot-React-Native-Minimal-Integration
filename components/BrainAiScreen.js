@@ -226,7 +226,12 @@ export default function BrainAiScreen() {
           <ProductGrid products={item.products} onProductPress={onProductPress} />
         )}
 
-        {item.isBot && (
+        {
+          item.isBot && 
+          isNaN(item.id) && // Only show the feedback options when response generation was finished.
+                            // We know it's finished when initially set botChatMessageId number was replaced with 
+                            // real response id from "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
+          (
           <View style={styles.reactionContainer}>
             <TouchableOpacity
               onPress={() => {
