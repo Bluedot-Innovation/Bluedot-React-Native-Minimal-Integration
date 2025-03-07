@@ -212,51 +212,52 @@ export default function BrainAiScreen() {
 
   const renderMessage = ({ item, index }) => {
     return (
-      <View
-        style={[
-          styles.messageContainer,
-          item.user ? styles.userMessage : styles.responseMessage,
-        ]}
-      >
-        {item.isBot ? (
-          <RenderHTML contentWidth={300} source={{ html: item.text }} />
-        ) : (
-          <Text style={styles.messageText}>{item.text}</Text>
-        )}
-  
-        {item.products.length > 0 && (
-          <ProductGrid products={item.products} onProductPress={onProductPress} />
-        )}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View
+          style={[
+            styles.messageContainer,
+            item.user ? styles.userMessage : styles.responseMessage,
+          ]}
+        >
+          {item.isBot ? (
+            <RenderHTML contentWidth={300} source={{ html: item.text }} />
+          ) : (
+            <Text style={styles.messageText}>{item.text}</Text>
+          )}
+    
+          {item.products.length > 0 && (
+            <ProductGrid products={item.products} onProductPress={onProductPress} />
+          )}
 
-        {
-          item.isBot && 
-          isNaN(item.id) && // Only show the feedback options when response generation was finished.
-                            // We know it's finished when initially set botChatMessageId number was replaced with 
-                            // real response id from "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
-          (
-          <View style={styles.reactionContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                console.log("response liked: "+item.id);
-                onResponseFeedback(item.id, true);
-              }}
-              style={[styles.reactionButton, item.liked === true && styles.liked]}
-            >
-              <Text style={{ color: item.liked === true ? 'blue' : 'gray' }}>👍</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                console.log("response disliked: "+item.id);
-                onResponseFeedback(item.id, false);
-              }}
-              style={[styles.reactionButton, item.liked === false && styles.disliked]}
-            >
-              <Text style={{ color: item.liked === false ? 'red' : 'gray' }}>👎</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        
-      </View>
+          {
+            item.isBot && 
+            isNaN(item.id) && // Only show the feedback options when response generation was finished.
+                              // We know it's finished when initially set botChatMessageId number was replaced with 
+                              // real response id from "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
+            (
+            <View style={styles.reactionContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  console.log("response liked: "+item.id);
+                  onResponseFeedback(item.id, true);
+                }}
+                style={[styles.reactionButton, item.liked === true && styles.liked]}
+              >
+                <Text style={{ color: item.liked === true ? 'blue' : 'gray' }}>👍</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  console.log("response disliked: "+item.id);
+                  onResponseFeedback(item.id, false);
+                }}
+                style={[styles.reactionButton, item.liked === false && styles.disliked]}
+              >
+                <Text style={{ color: item.liked === false ? 'red' : 'gray' }}>👎</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
     );
   };
 
