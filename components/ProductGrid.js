@@ -30,7 +30,7 @@ const ProductGrid = ({ products, onProductPress }) => {
         <FlatList
           data={products}
           renderItem={renderProductItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.productId}
           numColumns={numColumns}
         />
       )}

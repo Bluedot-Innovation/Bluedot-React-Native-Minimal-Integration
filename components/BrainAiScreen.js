@@ -13,8 +13,7 @@ class ChatMessage {
     this.id = id;
     this.text = text;
     this.user = user;
-    this.liked = false;
-    this.disliked = false;
+    this.liked = null;
     this.isBot = !user;
     this.products = [];
   }
@@ -68,6 +67,18 @@ export default function BrainAiScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!userScrolledUp) {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
+  const handleScroll = (event) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+    setUserScrolledUp(!isAtBottom);
+  };
+
   const onBackAction = () => {
     brainAi.getChatSessionIDs().then((chatSessionIDs) => {
       chatSessionIDs.forEach(element => {
@@ -83,7 +94,7 @@ export default function BrainAiScreen() {
   const registerBrainAiListeners = (chatSessionId) => {
     console.log("REGISTER LISTENERS: "+brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId);
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_TEXT_RESPONSE+chatSessionId, (event) => {
-      console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
+      // console.log("BRAIN_EVENT_TEXT_RESPONSE: "+event.brainEventTextResponse);
       setMessages(prevMessages => {
         return prevMessages.map(msg => {
           if (msg.isBot && msg.id === botMessageRef.current?.id) {
@@ -95,11 +106,14 @@ export default function BrainAiScreen() {
     });
 
     BluedotPointSdk.on(brainAi.BRAIN_EVENT_CONTEXT_RESPONSE+chatSessionId, (event) => {
-      console.log("BRAIN_EVENT_CONTEXT_RESPONSE: " + event.brainEventContextResponse.length);
+      // console.log("BRAIN_EVENT_CONTEXT_RESPONSE: " + event.brainEventContextResponse.length);
 
       if (event.brainEventContextResponse.length > 0) {
         const products = event.brainEventContextResponse.map(product => ({
-          id: product.product_id ?? product.title, // in case the id is missing
+          productId: product.product_id ?? product.title, // in case the id is missing
+          categoryId: product.categoryId,
+          merchantId: product.merchantId,
+          description: product.description,
           title: product.title,
           price: product.price,
           image: product.image_links?.length > 0 ? product.image_links[0] : placeholderImage,
@@ -119,7 +133,26 @@ export default function BrainAiScreen() {
       }
     });
 
-    BluedotPointSdk.on(brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId, () => {
+    BluedotPointSdk.on(brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId, (event) => {
+      const responseId = event.brainEventResponseID;
+      const currentBotResponseId = botMessageRef.current?.id
+      console.log("BRAIN_EVENT_RESPONSE_ID: " + responseId);
+      
+      /**
+       * Response generation finished.
+       * Update response id of the last BrainAi response.
+       */
+      setMessages(prevMessages =>
+        prevMessages.map(msg => {
+          if (msg.isBot && msg.id === currentBotResponseId) {
+            return { 
+              ...msg, 
+              id: responseId
+            };
+          }
+          return msg;
+        })
+      );
       botMessageRef.current = null;
     });
 
@@ -148,7 +181,8 @@ export default function BrainAiScreen() {
       brainAi.sendMessage(chatSessionId, inputText);
 
       setTimeout(() => {
-        const botChatMessageId = Date.now() + 1;
+        const botChatMessageId = Date.now() + 1;  // assign temporary id to the response until a real response id is returned 
+                                                  // in "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
         const botMessage = new ChatMessage(botChatMessageId, "...", false);
         botMessageRef.current = botMessage;
         setMessages(prev => [...prev, botMessage]);
@@ -156,42 +190,73 @@ export default function BrainAiScreen() {
     }
   };
 
-  useEffect(() => {
-    if (!userScrolledUp) {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }
-  }, [messages]);
-
-  const handleScroll = (event) => {
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-    setUserScrolledUp(!isAtBottom);
-  };
-
   const onProductPress = (product) => {
     console.log("Product clicked:", product);
+    console.log("chatSessionId: "+chatSessionId);
   };
+
+  const onResponseFeedback = (msgId, liked) => {
+    brainAi.submitFeedback(chatSessionId, msgId, liked);
+    setMessages(prevMessages =>
+      prevMessages.map(msg => {
+        if (msg.isBot && msg.id === msgId) {
+          return { 
+            ...msg, 
+            liked
+          };
+        }
+        return msg;
+      })
+    );
+  }
 
   const renderMessage = ({ item, index }) => {
     return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View
-          style={[
-            styles.messageContainer,
-            item.user ? styles.userMessage : styles.responseMessage,
-          ]}
-        >
-          {item.isBot ? (
-            <RenderHTML contentWidth={300} source={{ html: item.text }} />
-          ) : (
-            <Text style={styles.messageText}>{item.text}</Text>
-          )}
-    
-          {item.isBot && item.products.length > 0 && (
-            <ProductGrid products={item.products} onProductPress={onProductPress} />
-          )}
-        </View>
-      </TouchableWithoutFeedback>
+      <View
+        style={[
+          styles.messageContainer,
+          item.user ? styles.userMessage : styles.responseMessage,
+        ]}
+      >
+        {item.isBot ? (
+          <RenderHTML contentWidth={300} source={{ html: item.text }} />
+        ) : (
+          <Text style={styles.messageText}>{item.text}</Text>
+        )}
+  
+        {item.products.length > 0 && (
+          <ProductGrid products={item.products} onProductPress={onProductPress} />
+        )}
+
+        {
+          item.isBot && 
+          isNaN(item.id) && // Only show the feedback options when response generation was finished.
+                            // We know it's finished when initially set botChatMessageId number was replaced with 
+                            // real response id from "brainAi.BRAIN_EVENT_RESPONSE_ID+chatSessionId" event.
+          (
+          <View style={styles.reactionContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                console.log("response liked: "+item.id);
+                onResponseFeedback(item.id, true);
+              }}
+              style={[styles.reactionButton, item.liked === true && styles.liked]}
+            >
+              <Text style={{ color: item.liked === true ? 'blue' : 'gray' }}>👍</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                console.log("response disliked: "+item.id);
+                onResponseFeedback(item.id, false);
+              }}
+              style={[styles.reactionButton, item.liked === false && styles.disliked]}
+            >
+              <Text style={{ color: item.liked === false ? 'red' : 'gray' }}>👎</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
+      </View>
     );
   };
 
@@ -242,5 +307,9 @@ const styles = StyleSheet.create({
   responseMessage: { alignSelf: "flex-start", backgroundColor: "#e5e5ea" },
   messageText: { fontSize: 16 },
   inputContainer: { flexDirection: "row", alignItems: "center", marginTop: 10 },
-  input: { flex: 1, borderWidth: 1, borderColor: "gray", borderRadius: 5, padding: 10, marginRight: 10 }
+  input: { flex: 1, borderWidth: 1, borderColor: "gray", borderRadius: 5, padding: 10, marginRight: 10 },
+  reactionContainer: { flexDirection: 'row', marginTop: 8 },
+  reactionButton: { padding: 8, marginHorizontal: 4, borderRadius: 8, backgroundColor: '#f0f0f0' },
+  liked: { backgroundColor: '#d0e8ff' },
+  disliked: { backgroundColor: '#ffd0d0' },
 });
