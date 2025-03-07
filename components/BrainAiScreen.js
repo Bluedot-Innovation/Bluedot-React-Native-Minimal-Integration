@@ -174,22 +174,24 @@ export default function BrainAiScreen() {
 
   const renderMessage = ({ item, index }) => {
     return (
-      <View
-        style={[
-          styles.messageContainer,
-          item.user ? styles.userMessage : styles.responseMessage,
-        ]}
-      >
-        {item.isBot ? (
-          <RenderHTML contentWidth={300} source={{ html: item.text }} />
-        ) : (
-          <Text style={styles.messageText}>{item.text}</Text>
-        )}
-  
-        {item.isBot && item.products.length > 0 && (
-          <ProductGrid products={item.products} onProductPress={onProductPress} />
-        )}
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View
+          style={[
+            styles.messageContainer,
+            item.user ? styles.userMessage : styles.responseMessage,
+          ]}
+        >
+          {item.isBot ? (
+            <RenderHTML contentWidth={300} source={{ html: item.text }} />
+          ) : (
+            <Text style={styles.messageText}>{item.text}</Text>
+          )}
+    
+          {item.isBot && item.products.length > 0 && (
+            <ProductGrid products={item.products} onProductPress={onProductPress} />
+          )}
+        </View>
+      </TouchableWithoutFeedback>
     );
   };
 
