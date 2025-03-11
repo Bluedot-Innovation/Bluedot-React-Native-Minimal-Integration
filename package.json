@@ -5,6 +5,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
+    "postinstall": "patch-package",
     "test": "jest"
   },
   "dependencies": {
@@ -30,17 +31,19 @@
     "expo-modules-core": "^2.2.2",
     "expo-splash-screen": "^0.29.22",
     "expo-status-bar": "^2.0.1",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "18.3.1",
     "react-native": "^0.77.0",
     "react-native-gesture-handler": "~2.22.1",
     "react-native-permissions": "~3.9.0",
     "react-native-push-notification": "~8.1.1",
+    "react-native-render-html": "6.3.4",
     "react-native-screens": "~4.9.1",
     "react-native-web": "~0.19.6",
     "react-router-dom": "~6.3.0",
     "react-router-native": "~6.3.0",
-    "react-native-render-html": "6.3.4",
     "upgrade": "^1.1.0"
   },
   "devDependencies": {

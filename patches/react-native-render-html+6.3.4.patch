@@ -1,0 +1,139 @@
+diff --git a/node_modules/react-native-render-html/src/TChildrenRenderer.tsx b/node_modules/react-native-render-html/src/TChildrenRenderer.tsx
+index 618a592..013cc0d 100644
+--- a/node_modules/react-native-render-html/src/TChildrenRenderer.tsx
++++ b/node_modules/react-native-render-html/src/TChildrenRenderer.tsx
+@@ -6,8 +6,10 @@ import renderChildren from './renderChildren';
+  * A component to render collections of tnodes.
+  * Especially useful when used with {@link useTNodeChildrenProps}.
+  */
+-const TChildrenRenderer: FunctionComponent<TChildrenRendererProps> =
+-  renderChildren.bind(null);
++const TChildrenRenderer: FunctionComponent<TChildrenRendererProps> = (props) => {
++  const mergedProps = { ...tchildrenRendererDefaultProps, ...props };
++  return renderChildren(mergedProps);
++};
+ 
+ export const tchildrenRendererDefaultProps: Pick<
+   TChildrenRendererProps,
+@@ -16,9 +18,6 @@ export const tchildrenRendererDefaultProps: Pick<
+   propsForChildren: {}
+ };
+ 
+-/**
+- * @ignore
+- */
+-TChildrenRenderer.defaultProps = tchildrenRendererDefaultProps;
++
+ 
+ export default TChildrenRenderer;
+diff --git a/node_modules/react-native-render-html/src/TNodeChildrenRenderer.tsx b/node_modules/react-native-render-html/src/TNodeChildrenRenderer.tsx
+index bf5aef6..201320f 100644
+--- a/node_modules/react-native-render-html/src/TNodeChildrenRenderer.tsx
++++ b/node_modules/react-native-render-html/src/TNodeChildrenRenderer.tsx
+@@ -57,25 +57,17 @@ export function useTNodeChildrenProps({
+   };
+ }
+ 
+-/**
+- * A component to render all children of a {@link TNode}.
+- */
+-function TNodeChildrenRenderer(
+-  props: TNodeChildrenRendererProps
+-): ReactElement {
+-  if (props.tnode.type === 'text') {
+-    // see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20544
+-    return props.tnode.data as unknown as ReactElement;
++function TNodeChildrenRenderer(props: TNodeChildrenRendererProps): ReactElement {
++  const { tnode, ...restProps } = {
++    ...tchildrenRendererDefaultProps,
++    ...props, 
++  };
++
++  if (tnode.type === 'text') {
++    return tnode.data as unknown as ReactElement;
+   }
+-  // A tnode type will never change. We can safely
+-  // ignore the non-conditional rule of hooks.
+-  // eslint-disable-next-line react-hooks/rules-of-hooks
+-  return renderChildren(useTNodeChildrenProps(props));
+-}
+ 
+-/**
+- * @ignore
+- */
+-TNodeChildrenRenderer.defaultProps = tchildrenRendererDefaultProps;
++  return renderChildren(useTNodeChildrenProps({ tnode, ...restProps }));
++}
+ 
+ export default TNodeChildrenRenderer;
+diff --git a/node_modules/react-native-render-html/src/TNodeRenderer.tsx b/node_modules/react-native-render-html/src/TNodeRenderer.tsx
+index d32140f..c277c80 100644
+--- a/node_modules/react-native-render-html/src/TNodeRenderer.tsx
++++ b/node_modules/react-native-render-html/src/TNodeRenderer.tsx
+@@ -38,13 +38,21 @@ function isGhostTNode(tnode: TNode) {
+   );
+ }
+ 
++const defaultProps: Required<Pick<TNodeRendererProps<any>, 'propsFromParent'>> =
++  {
++    propsFromParent: {
++      collapsedMarginTop: null
++    }
++  };
++
++
+ /**
+  * A component to render any {@link TNode}.
+  */
+ const TNodeRenderer = memo(function MemoizedTNodeRenderer(
+   props: TNodeRendererProps<any>
+ ): ReactElement | null {
+-  const { tnode } = props;
++  const { tnode } = {...props, ...defaultProps};
+   const sharedProps = useSharedProps();
+   const renderRegistry = useRendererRegistry();
+   const TNodeChildrenRenderer = useTNodeChildrenRenderer();
+@@ -120,15 +128,7 @@ const TNodeRenderer = memo(function MemoizedTNodeRenderer(
+     : React.createElement(Renderer as any, assembledProps);
+ });
+ 
+-const defaultProps: Required<Pick<TNodeRendererProps<any>, 'propsFromParent'>> =
+-  {
+-    propsFromParent: {
+-      collapsedMarginTop: null
+-    }
+-  };
+ 
+-// @ts-expect-error default props must be defined
+-TNodeRenderer.defaultProps = defaultProps;
+ 
+ export {
+   TDefaultBlockRenderer,
+diff --git a/node_modules/react-native-render-html/src/TRenderEngineProvider.tsx b/node_modules/react-native-render-html/src/TRenderEngineProvider.tsx
+index 95b60df..1e6277a 100644
+--- a/node_modules/react-native-render-html/src/TRenderEngineProvider.tsx
++++ b/node_modules/react-native-render-html/src/TRenderEngineProvider.tsx
+@@ -98,7 +98,7 @@ export function useAmbientTRenderEngine() {
+ export default function TRenderEngineProvider({
+   children,
+   ...config
+-}: PropsWithChildren<TRenderEngineConfig>): ReactElement {
++}: PropsWithChildren<TRenderEngineConfig> = defaultTRenderEngineProviderProps): ReactElement {
+   const engine = useTRenderEngine(config);
+   return (
+     <TRenderEngineContext.Provider value={engine}>
+@@ -106,13 +106,3 @@ export default function TRenderEngineProvider({
+     </TRenderEngineContext.Provider>
+   );
+ }
+\ No newline at end of file
+-
+-/**
+- * @ignore
+- */
+-TRenderEngineProvider.defaultProps = defaultTRenderEngineProviderProps;
+-
+-/**
+- * @ignore
+- */
+-TRenderEngineProvider.propTypes = tRenderEngineProviderPropTypes;
