@@ -161,6 +161,24 @@ export default function BrainAiScreen() {
       if (event.brainEventErrorCode in brainAi.errorMessages) {
         console.log("error: "+brainAi.errorMessages[event.brainEventErrorCode]);
       }
+
+      switch (event.brainEventErrorCode) {
+        case 10001:
+          console.error("Error: CHAT_NOT_FOUND - The chat session could not be found.");
+          // Handle the error (e.g., prompt user to start a new chat)
+          break;
+        case 10002:
+          console.error("Error: FAILED_TO_CREATE_CHAT - Unable to initiate a new chat.");
+          // Handle the error (e.g., retry chat creation or notify user)
+          break;
+        case 10003:
+          console.error("Error: FAILED_TO_SUBMIT_FEEDBACK - Feedback submission failed.");
+          // Handle the error (e.g., ask the user to try again later)
+          break;
+        default:
+          console.error("Unknown error: " + event.brainEventErrorCode);
+          // Generic fallback handling
+      }
     });
   };
 
