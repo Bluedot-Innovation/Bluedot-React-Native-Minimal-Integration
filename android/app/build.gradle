@@ -141,7 +141,11 @@ android {
     }
     buildFeatures {
         buildConfig true
+        compose true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion rootProject.ext.composeVersion
+    }        
 
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
