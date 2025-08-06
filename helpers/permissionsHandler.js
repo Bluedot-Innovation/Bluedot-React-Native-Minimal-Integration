@@ -30,15 +30,15 @@ export const requestLocationPermissions = async () => {
   if (Platform.OS === OS.IOS) {
     Geolocation.setRNConfiguration({
     skipPermissionRequests: false,
-     authorizationLevel: 'whenInUse',
-   });
+    authorizationLevel: 'whenInUse',
+  });
     Geolocation.requestAuthorization();
   }
 };
 
 export const requestBluetoothPermissions = async () => {
   if (Platform.OS === OS.IOS) {
-    await request(PERMISSIONS.IOS.BLUETOOTH_PERIPHERAL);
+    await request(PERMISSIONS.IOS.BLUETOOTH);
   }
 };
 

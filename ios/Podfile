@@ -7,13 +7,11 @@ def node_require(script)
     )", __dir__]).strip
 end
 
+# Use it to require both react-native's and this package's scripts:
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
-$RNFirebaseAsStaticFramework = true
 
-require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-
-platform :ios, '15.6'
+platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -22,59 +20,46 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'RNPointSDKMinimalIntegration' do
-  use_expo_modules!
-  post_integrate do |installer|
-    begin
-      expo_patch_react_imports!(installer)
-    rescue => e
-      Pod::UI.warn e
-    end
-  end
+target 'BluedotRNMin' do
   config = use_native_modules!
-
-  # Flags change depending on the env values.
-  flags = get_default_flags()
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # Hermes is now enabled by default. Disable by setting this flag to false.
-    # Upcoming versions of React Native may rely on get_default_flags(), but
-    # we make it explicit here to aid in the React Native upgrade process.
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
   
-  # Find more permissions at: https://github.com/zoontek/react-native-permissions?tab=readme-ov-file#ios
   setup_permissions([
-    'Notifications',
+    # 'AppTrackingTransparency',
+    'Bluetooth',
+    # 'Calendars',
+    # 'CalendarsWriteOnly',
+    # 'Camera',
+    # 'Contacts',
+    # 'FaceID',
+    'LocationAccuracy',
+    'LocationAlways',
+    'LocationWhenInUse',
+    # 'MediaLibrary',
+    # 'Microphone',
+    # 'Motion',
+    'Notifications'
+    # 'PhotoLibrary',
+    # 'PhotoLibraryAddOnly',
+    # 'Reminders',
+    # 'Siri',
+    # 'SpeechRecognition',
+    # 'StoreKit',
   ])
 
-  target 'RNPointSDKMinimalIntegrationTests' do
-    inherit! :complete
-    # Pods for testing
-  end
 
   post_install do |installer|
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
-      # Set `mac_catalyst_enabled` to `true` in order to apply patches
-      # necessary for Mac Catalyst builds
-      :mac_catalyst_enabled => false
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false,
+      # :ccache_enabled => true
     )
-
-    # This is necessary for Xcode 14, because it signs resource bundles by default
-    # when building for devices.
-    installer.target_installation_results.pod_target_installation_results
-      .each do |pod_name, target_installation_result|
-      target_installation_result.resource_bundle_targets.each do |resource_bundle_target|
-        resource_bundle_target.build_configurations.each do |config|
-          config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-        end
-      end
-    end
-
   end
 end

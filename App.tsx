@@ -1,9 +1,18 @@
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ */
+
+//import { NewAppScreen } from '@react-native/new-app-screen';
+import {  StyleSheet, useColorScheme } from 'react-native';
 import React from 'react';
-import { NativeRouter, Route, Routes } from "react-router-native";
-import { StatusBar } from 'expo-status-bar';
 import {
   requestAllPermissions,
 } from "./helpers/permissionsHandler";
+import { NativeRouter, Route, Routes } from "react-router-native";
+
 
 import Initilize from "./components/InitializeSdk";
 import Main from "./components/Main";
@@ -11,15 +20,15 @@ import GeoTriggering from "./components/GeoTriggering";
 import Tempo from "./components/Tempo";
 
 
-export default function App() {
+function App() {
+  const isDarkMode = useColorScheme() === 'dark';
 
-  React.useEffect(() => {
+    React.useEffect(() => {
     requestAllPermissions();
   }, []);
 
   return (
     <NativeRouter>
-      <StatusBar style="dark" />
       <Routes>
         <Route exact path="/" element={<Initilize />} />
         <Route exact path="/main" element={<Main />} />
@@ -28,4 +37,13 @@ export default function App() {
       </Routes>
     </NativeRouter>
   );
+
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
+
+export default App;

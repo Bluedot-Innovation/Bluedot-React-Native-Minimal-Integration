@@ -1,5 +1,7 @@
 {
-  "version": "3.2.2",
+  "name": "BluedotRNMin",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -8,49 +10,38 @@
     "test": "jest"
   },
   "dependencies": {
-    "@babel/core": "7.25.2",
-    "@babel/helper-module-transforms": "^7.25.2",
-    "@react-native-async-storage/async-storage": "1.21.0",
-    "@react-native-community/cli": "15.0.1",
-    "@react-native-community/cli-platform-android": "15.0.1",
-    "@react-native-community/geolocation": "^2.1.0",
-    "@react-native-community/push-notification-ios": "^1.10.1",
-    "@react-native/babel-preset": "0.76.6",
-    "@react-native/gradle-plugin": "0.76.6",
-    "@react-native/metro-config": "0.76.6",
-    "appcenter": "^5.0.1",
-    "appcenter-crashes": "^5.0.1",
-    "bluedot-react-native": "^3.2.2",
-    "expo": "^52.0.28",
-    "expo-application": "^5.9.1",
-    "expo-constants": "~16.0.2",
-    "expo-file-system": "^17.0.1",
-    "expo-font": "^12.0.7",
-    "expo-keep-awake": "^13.0.2",
-    "expo-modules-core": "^2.1.4",
-    "expo-splash-screen": "^0.27.5",
-    "expo-status-bar": "~1.12.1",
-    "react": "^18.3.1",
-    "react-dom": "18.3.1",
-    "react-native": "^0.76.6",
-    "react-native-gesture-handler": "~2.22.1",
-    "react-native-gradle-plugin": "^0.72.1",
-    "react-native-permissions": "~3.9.0",
-    "react-native-push-notification": "~8.1.1",
-    "react-native-reanimated": "~3.17.0-nightly",
-    "react-native-screens": "~4.0.0",
-    "react-native-web": "~0.19.6",
-    "react-router-dom": "~6.3.0",
-    "react-router-native": "~6.3.0",
-    "upgrade": "^1.1.0"
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/geolocation": "^3.4.0",
+    "@react-native-community/push-notification-ios": "^1.11.0",
+    "@react-native/new-app-screen": "0.80.2",
+    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#nk/BD-6132-RN-0.80.1",
+    "react": "19.1.0",
+    "react-native": "0.80.2",
+    "react-native-permissions": "^5.4.2",
+    "react-native-push-notification": "^8.1.1",
+    "react-router-native": "^6.30.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.22.8",
-    "@babel/plugin-transform-private-methods": "^7.25.9",
-    "metro-react-native-babel-preset": "^0.77.0"
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.3",
+    "@babel/runtime": "^7.25.0",
+    "@react-native-community/cli": "19.1.1",
+    "@react-native-community/cli-platform-android": "19.1.1",
+    "@react-native-community/cli-platform-ios": "19.1.1",
+    "@react-native/babel-preset": "0.80.2",
+    "@react-native/eslint-config": "0.80.2",
+    "@react-native/metro-config": "0.80.2",
+    "@react-native/typescript-config": "0.80.2",
+    "@types/jest": "^29.5.13",
+    "@types/react": "^19.1.0",
+    "@types/react-test-renderer": "^19.1.0",
+    "eslint": "^8.19.0",
+    "jest": "^29.6.3",
+    "prettier": "2.8.8",
+    "react-test-renderer": "19.1.0",
+    "typescript": "5.0.4"
   },
-  "overrides": {
-    "@babel/traverse": "7.25.9"
-  },
-  "private": true
+  "engines": {
+    "node": ">=18"
+  }
 }

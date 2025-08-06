@@ -1,35 +1,4 @@
 {
-  "expo": {
-    "name": "RNPointSDKMinimalIntegration",
-    "slug": "RNPointSDKMinimalIntegration",
-    "version": "3.2.2",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": ["**/*"],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "io.bluedot.RNPointSDKMinimalIntegration"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
-      "package": "com.rnpointsdkminimalintegration"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
-  },
-  "displayName": "React Native Point SDK Minimal Integration",
-  "name": "RNPointSDKMinimalIntegration"
+  "name": "BluedotRNMin",
+  "displayName": "BluedotRNMin"
 }

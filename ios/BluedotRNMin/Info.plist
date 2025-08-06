@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>RNPointSDKMinimalIntegration</string>
+	<string>BluedotRNMin</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,14 +26,10 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
-		</dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Allow React Native Point SDK Minimal Integration to use your location</string>
@@ -41,6 +37,12 @@
 	<string>Allow React Native Point SDK Minimal Integration to use your location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Allow React Native Point SDK Minimal Integration to use your location</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>REASON</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>REASON</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
@@ -52,13 +54,13 @@
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv64</string>
+		<string>arm64</string>
 	</array>
-	<key>UIStatusBarStyle</key>
-	<string></string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>

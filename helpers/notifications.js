@@ -12,7 +12,7 @@ export const sendLocalNotification = (message) => {
             id: (new Date()).toString(),
             title,
             body: message,
-            isSilent: true
+            isSilent: false
         })
     }
 
