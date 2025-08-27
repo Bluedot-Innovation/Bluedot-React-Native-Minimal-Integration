@@ -55,7 +55,7 @@ public class MainApplication extends Application implements ReactApplication {
 
   @Override
   public ReactHost getReactHost() {
-    return getDefaultReactHost(this, mReactNativeHost);
+    return getDefaultReactHost(this, mReactNativeHost, null);
   }
 
   @NonNull
