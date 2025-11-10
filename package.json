@@ -19,7 +19,7 @@
     "@react-native/babel-preset": "0.82.1",
     "@react-native/gradle-plugin": "0.82.1",
     "@react-native/metro-config": "0.82.1",
-    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#feature/BD-6516-rn-update",
+    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#feature/BD-6516",
     "expo": "54.0.23",
     "expo-application": "~7.0.7",
     "expo-constants": "~18.0.10",
