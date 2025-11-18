@@ -19,7 +19,7 @@
     "@react-native/babel-preset": "0.81.5",
     "@react-native/gradle-plugin": "0.81.5",
     "@react-native/metro-config": "0.81.5",
-    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#nk/BD-6516-ios-expose-custom-data",
+    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#prep/3.4.0",
     "expo": "54.0.23",
     "expo-application": "~7.0.7",
     "expo-constants": "~18.0.10",
