@@ -124,10 +124,12 @@ export default function GeoTriggering() {
       {error ? <Text>Error: {error}</Text> : null}
       {Platform.OS === OS.IOS && <>
         <Text>Allow Background Location Updates</Text>
-        <Switch
-          onValueChange={toggleSwitch}
-          value={isBackgroundLocationUpdatesEnabled}
-        />
+        <View style={{ alignItems: 'center', marginVertical: 10 }}>
+          <Switch
+            onValueChange={toggleSwitch}
+            value={isBackgroundLocationUpdatesEnabled}
+          />
+        </View>
         <Text>{isBackgroundLocationUpdatesEnabledString}</Text>
       </>}
       {isGeotriggeringRunning ? (

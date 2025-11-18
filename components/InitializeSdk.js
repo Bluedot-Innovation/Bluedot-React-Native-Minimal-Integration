@@ -68,6 +68,29 @@ export default function Initialize() {
           const message = `Did Update ZoneInfo ${JSON.stringify(zoneInfos)}`;
           console.log(message);
           console.log(JSON.stringify(zoneInfos))
+
+          zoneInfos.forEach((zoneInfo, index) => {
+            const destinationCustomData = zoneInfo.destination?.customData;
+            if (destinationCustomData) {
+              console.log("Zone name:", zoneInfo.name);
+              
+              if (typeof destinationCustomData === 'object' && 
+                  destinationCustomData !== null && 
+                  !Array.isArray(destinationCustomData)) {
+              
+                Object.entries(destinationCustomData).forEach(([key, value]) => {
+                  console.log(`"${key}", "${value}"`);
+                });
+                
+                const message = `zoneInfoUpdate: ${zoneInfo.name} with custom data: ${JSON.stringify(destinationCustomData)}`;
+                sendLocalNotification(message);
+
+              } else {
+                console.log("Destination custom data is not a valid map. Type:", typeof destinationCustomData);
+                console.log("Value:", destinationCustomData);
+              }
+            }
+          });
         }
       });
     });

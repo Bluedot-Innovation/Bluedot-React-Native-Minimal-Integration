@@ -1,5 +1,5 @@
 {
-  "version": "3.3.2",
+  "version": "3.4.0",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -19,14 +19,13 @@
     "@react-native/babel-preset": "0.81.5",
     "@react-native/gradle-plugin": "0.81.5",
     "@react-native/metro-config": "0.81.5",
-    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#feature/BD-6516",
-    "expo": "54.0.22",
+    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#prep/3.4.0",
+    "expo": "54.0.23",
     "expo-application": "~7.0.7",
     "expo-constants": "~18.0.10",
     "expo-file-system": "~19.0.17",
     "expo-font": "~14.0.9",
     "expo-keep-awake": "~15.0.7",
-    "expo-modules-core": "~3.0.24",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
     "patch-package": "^8.0.0",
@@ -45,9 +44,8 @@
     "upgrade": "^1.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/plugin-transform-private-methods": "^7.25.9",
-    "metro-react-native-babel-preset": "^0.77.0"
+    "@babel/core": "^7.28.5",
+    "@babel/plugin-transform-private-methods": "^7.27.1"
   },
   "overrides": {
     "@babel/traverse": "7.25.9"
