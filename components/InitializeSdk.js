@@ -42,7 +42,9 @@ export default function Initialize() {
   }, [isSdkInitialized]);
 
   const registerBluedotListeners = () => {
+  console.log("Registering BluedotPointSdk Listeners");
     BluedotPointSdk.on("enterZone", (event) => {
+     console.log("Enter Zone Event Triggered");
       const message = `You have checked in ${event.zoneInfo.name}`;
       sendLocalNotification(message);
       console.log(`entered: ${JSON.stringify(event)}`);
@@ -62,6 +64,7 @@ export default function Initialize() {
     });
 
     BluedotPointSdk.on("zoneInfoUpdate", () => {
+    console.log("Zone Info Update Event Triggered");
       // zoneInfoUpdate callback no longer returns zoneInfos, query it directly from the SDK
       BluedotPointSdk.getZonesAndFences().then((zoneInfos) => {
         if (zoneInfos != null) {
