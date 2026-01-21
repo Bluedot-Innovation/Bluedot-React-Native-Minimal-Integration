@@ -1,5 +1,6 @@
 package com.rnpointsdkminimalintegration;
 
+import static com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative;
 import static com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost;
 
 import android.content.res.Configuration;
@@ -46,11 +47,6 @@ public class MainApplication extends Application implements ReactApplication {
         protected boolean isNewArchEnabled() {
           return BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
         }
-
-        @Override
-        protected Boolean isHermesEnabled() {
-          return BuildConfig.IS_HERMES_ENABLED;
-        }
       });
 
   @Override
@@ -67,16 +63,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
-
-    try {
-        SoLoader.init(this, OpenSourceMergedSoMapping.INSTANCE);
-    } catch (IOException e) {
-        throw new RuntimeException(e);
-    }
-    if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-      // If you opted-in for the New Architecture, we load the native entry point for this app.
-      DefaultNewArchitectureEntryPoint.load();
-    }
+    loadReactNative(this);
     ApplicationLifecycleDispatcher.onApplicationCreate(this);
   }
 
