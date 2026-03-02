@@ -4,11 +4,11 @@ buildscript {
     ext {
         buildToolsVersion = "35.0.0"
         minSdkVersion = 26
-        compileSdkVersion = 35
-        targetSdkVersion = 35
+        compileSdkVersion = 36
+        targetSdkVersion = 36
 
         ndkVersion = "27.3.13750724"
-        kotlinVersion = "2.0.21"
+        kotlinVersion = "2.1.21"
         composeVersion = "1.5.4"
     }
     repositories {
@@ -22,3 +22,22 @@ buildscript {
         classpath("androidx.compose.compiler:compiler:${composeVersion}")
     }
 }
+
+allprojects {
+    repositories {
+        maven {
+            url = uri("${rootProject.projectDir}/../node_modules/@react-native-async-storage/async-storage/android/local_repo")
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.plugins.hasPlugin("com.android.library") || project.plugins.hasPlugin("com.android.application")) {
+            project.android.lint {
+                lintConfig = rootProject.file("lint.xml")
+            }
+        }
+    }
+}
+
