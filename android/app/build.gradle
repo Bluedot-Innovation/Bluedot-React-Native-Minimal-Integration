@@ -181,3 +181,25 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+/**
+ * CI safety for RN New Architecture:
+ * Ensure all codegen artifacts are generated before any CMake configure task.
+ * This avoids missing `build/generated/source/codegen/jni` directories on clean machines.
+ */
+afterEvaluate {
+    def cmakeConfigureTasks = tasks.matching { task ->
+        task.name.startsWith("configureCMake")
+    }
+
+    rootProject.subprojects.each { subproject ->
+        subproject.tasks.matching { task ->
+            task.name == "generateCodegenSchemaFromJavaScript" ||
+            task.name == "generateCodegenArtifactsFromSchema"
+        }.all { codegenTask ->
+            cmakeConfigureTasks.configureEach { cmakeTask ->
+                cmakeTask.dependsOn(codegenTask)
+            }
+        }
+    }
+}
