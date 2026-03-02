@@ -1,5 +1,5 @@
 {
-  "version": "3.3.2",
+  "version": "3.3.3",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -19,7 +19,7 @@
     "@react-native/babel-preset": "0.79.5",
     "@react-native/gradle-plugin": "0.79.5",
     "@react-native/metro-config": "0.79.5",
-    "bluedot-react-native": "3.3.2",
+    "bluedot-react-native": "Bluedot-Innovation/Bluedot-React-Native-Plugin#prep/3.3.3",
     "expo": "53.0.20",
     "expo-application": "~6.1.5",
     "expo-constants": "~17.1.7",
