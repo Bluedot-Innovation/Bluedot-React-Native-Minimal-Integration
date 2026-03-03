@@ -91,10 +91,15 @@ def reactNativeArchitectures() {
     return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
 }
 
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
+
+    lint {
+        lintConfig = file("$rootDir/lint.xml")
+    }
 
     namespace "com.rnpointsdkminimalintegration"
     defaultConfig {
@@ -174,5 +179,27 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+
+/**
+ * CI safety for RN New Architecture:
+ * Ensure all codegen artifacts are generated before any CMake configure task.
+ * This avoids missing `build/generated/source/codegen/jni` directories on clean machines.
+ */
+afterEvaluate {
+    def cmakeConfigureTasks = tasks.matching { task ->
+        task.name.startsWith("configureCMake")
+    }
+
+    rootProject.subprojects.each { subproject ->
+        subproject.tasks.matching { task ->
+            task.name == "generateCodegenSchemaFromJavaScript" ||
+            task.name == "generateCodegenArtifactsFromSchema"
+        }.all { codegenTask ->
+            cmakeConfigureTasks.configureEach { cmakeTask ->
+                cmakeTask.dependsOn(codegenTask)
+            }
+        }
     }
 }

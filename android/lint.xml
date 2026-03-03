@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Suppress GradlePluginVersion for third-party packages in node_modules -->
+    <!--  /Bluedot-React-Native-Minimal-Integration/node_modules/@react-native-community/geolocation/android/build.gradle:9: Error: You must use a newer version of the Android Gradle plugin. The minimum supported version is 4.0.0 and the recommended version is 9.0.1 [GradlePluginVersion]
+            classpath 'com.android.tools.build:gradle:3.2.1'
+    -->
+    <issue id="GradlePluginVersion">
+        <ignore path="**/node_modules/**" />
+    </issue>
+    <!-- Suppress MissingPermission for ACTION_CLOSE_SYSTEM_DIALOGS in react-native-push-notification (third-party, not modifiable) -->
+    <!--  /Bluedot-React-Native-Minimal-Integration/node_modules/react-native-push-notification/android/src/main/java/com/dieam/reactnativepushnotification/modules/RNPushNotificationActions.java:65: Error: Missing permissions required by intent Intent.ACTION_CLOSE_SYSTEM_DIALOGS: android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS [MissingPermission]
+            context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+    -->
+    <issue id="MissingPermission">
+        <ignore path="**/node_modules/**" />
+    </issue>
+</lint>
+
