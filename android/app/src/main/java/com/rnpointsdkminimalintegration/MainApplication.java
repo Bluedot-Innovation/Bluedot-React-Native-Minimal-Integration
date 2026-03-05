@@ -5,7 +5,6 @@ import static com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost;
 
 import android.content.res.Configuration;
 import expo.modules.ApplicationLifecycleDispatcher;
-import expo.modules.ReactNativeHostWrapper;
 import android.app.Application;
 import androidx.annotation.NonNull;
 import com.facebook.react.PackageList;
@@ -23,7 +22,7 @@ import java.util.List;
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
-      new ReactNativeHostWrapper(this, new DefaultReactNativeHost(this) {
+      new DefaultReactNativeHost(this) {
         @Override
         public boolean getUseDeveloperSupport() {
           return BuildConfig.DEBUG;
@@ -47,7 +46,7 @@ public class MainApplication extends Application implements ReactApplication {
         protected boolean isNewArchEnabled() {
           return BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
         }
-      });
+      };
 
   @Override
   public ReactHost getReactHost() {
