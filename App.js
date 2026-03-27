@@ -55,8 +55,11 @@ export default function App() {
     });
   }, []);
 
-  // Apply custom push notification config whenever the toggle is switched on
+  // Apply custom push notification config whenever the toggle is switched on.
+  // Skipped when FIREBASE_ENABLED is false — setCustomPushNotification reaches
+  // ServiceManager.pushNotificationsManager which requires Firebase to be initialised.
   React.useEffect(() => {
+    if (!FIREBASE_ENABLED) return;
     if (useCustomNotification) {
       PushNotifications.setCustomPushNotification(CUSTOM_PUSH_CONFIG);
     } else {
