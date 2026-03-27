@@ -183,7 +183,11 @@ dependencies {
  * Ensure all codegen artifacts are generated before any CMake configure task.
  * This avoids missing `build/generated/source/codegen/jni` directories on clean machines.
  */
-apply plugin: 'com.google.gms.google-services'
+// Apply the Google Services plugin only when firebaseEnabled=true in gradle.properties.
+// This lets the app build without a google-services.json file.
+if (project.hasProperty('firebaseEnabled') && firebaseEnabled.toBoolean()) {
+    apply plugin: 'com.google.gms.google-services'
+}
 
 afterEvaluate {
     def cmakeConfigureTasks = tasks.matching { task ->

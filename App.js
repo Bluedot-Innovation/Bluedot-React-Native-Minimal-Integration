@@ -9,6 +9,7 @@ import PushNotifications from 'bluedot-react-native-pushnotifications';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PushNotificationsContext } from './helpers/pushNotificationsContext';
+import { FIREBASE_ENABLED } from './config';
 
 import Initilize from "./components/InitializeSdk";
 import Main from "./components/Main";
@@ -29,15 +30,17 @@ const CUSTOM_PUSH_CONFIG = {
 
 // Forward background / quit-state FCM messages to the Bluedot Push SDK.
 // Re-apply (or clear) custom notification config to match the persisted toggle state.
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  const enabled = await AsyncStorage.getItem(CUSTOM_PUSH_NOTIFICATION_KEY);
-  if (enabled === 'true') {
-    PushNotifications.setCustomPushNotification(CUSTOM_PUSH_CONFIG);
-  } else {
-    PushNotifications.setCustomPushNotification(null);
-  }
-  PushNotifications.onMessageReceived(remoteMessage);
-});
+if (FIREBASE_ENABLED) {
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
+    const enabled = await AsyncStorage.getItem(CUSTOM_PUSH_NOTIFICATION_KEY);
+    if (enabled === 'true') {
+      PushNotifications.setCustomPushNotification(CUSTOM_PUSH_CONFIG);
+    } else {
+      PushNotifications.setCustomPushNotification(null);
+    }
+    PushNotifications.onMessageReceived(remoteMessage);
+  });
+}
 
 export default function App() {
 
@@ -70,15 +73,15 @@ export default function App() {
   React.useEffect(() => {
     requestAllPermissions();
 
-    // Forward FCM token updates to the Bluedot Push SDK
-    const unsubscribeToken = messaging().onTokenRefresh(token => {
-      PushNotifications.onNewFcmToken(token);
-    });
+    // Forward FCM token updates and foreground messages to the Bluedot Push SDK.
+    // Skipped when FIREBASE_ENABLED is false (no google-services config present).
+    const unsubscribeToken = FIREBASE_ENABLED
+      ? messaging().onTokenRefresh(token => { PushNotifications.onNewFcmToken(token); })
+      : () => {};
 
-    // Forward foreground FCM messages to the Bluedot Push SDK
-    const unsubscribeMessage = messaging().onMessage(async remoteMessage => {
-      PushNotifications.onMessageReceived(remoteMessage);
-    });
+    const unsubscribeMessage = FIREBASE_ENABLED
+      ? messaging().onMessage(async remoteMessage => { PushNotifications.onMessageReceived(remoteMessage); })
+      : () => {};
 
     // Listen for push notification events from Bluedot campaigns
     const receivedSub = PushNotifications.on(
