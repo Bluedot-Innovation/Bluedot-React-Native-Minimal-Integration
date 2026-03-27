@@ -3,12 +3,12 @@
 buildscript {
     ext {
         buildToolsVersion = "36.0.0"
-        minSdkVersion = 26
+        minSdkVersion = 29
         compileSdkVersion = 36
         targetSdkVersion = 36
 
         ndkVersion = "27.3.13750724"
-        kotlinVersion = "2.1.20"
+        kotlinVersion = "2.3.0"
         composeVersion = "1.5.4"
     }
     repositories {
@@ -20,5 +20,6 @@ buildscript {
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("androidx.compose.compiler:compiler:${composeVersion}")
+        classpath('com.google.gms:google-services:4.4.2')
     }
 }
