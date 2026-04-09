@@ -6,4 +6,4 @@
  *   AND firebaseEnabled=true in android/gradle.properties.
  *   When false, all Firebase / FCM push-notification wiring is skipped.
  */
-export const FIREBASE_ENABLED = false;
+export const FIREBASE_ENABLED = true;

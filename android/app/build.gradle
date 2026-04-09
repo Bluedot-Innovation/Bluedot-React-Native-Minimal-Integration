@@ -169,6 +169,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
 
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
+    implementation project(':bluedot-react-native-pushnotifications')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
