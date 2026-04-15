@@ -4,6 +4,7 @@ import { useNavigate } from "react-router"
 import BluedotPointSdk from "bluedot-react-native";
 import styles from "../styles";
 import { PushNotificationsContext } from "../helpers/pushNotificationsContext";
+import { FIREBASE_ENABLED } from "../config";
 
 export default function Main() {
   const navigate = useNavigate()
@@ -83,14 +84,16 @@ export default function Main() {
         <Button title="Reset SDK" onPress={handleResetSdk}/>
       </View>
 
-      <View style={styles.titleContainer}>
-        <Text style={styles.eventTitle}>Custom Push Notification</Text>
-        <Switch
-          value={useCustomNotification}
-          onValueChange={setUseCustomNotification}
-        />
-        <Text>{useCustomNotification ? 'Custom channel, icon & color active' : 'Using default notification settings'}</Text>
-      </View>
+      {FIREBASE_ENABLED && (
+        <View style={styles.titleContainer}>
+          <Text style={styles.eventTitle}>Custom Push Notification</Text>
+          <Switch
+            value={useCustomNotification}
+            onValueChange={setUseCustomNotification}
+          />
+          <Text>{useCustomNotification ? 'Custom channel, icon & color active' : 'Using default notification settings'}</Text>
+        </View>
+      )}
     </View>
   );
 }

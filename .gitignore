@@ -189,7 +189,6 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
 .env.test
 
 # parcel-bundler cache (https://parceljs.org/)
@@ -531,3 +530,6 @@ fabric.properties
 
 # Gem/bundle
 vendor/
+
+.github/
+_bmad/

@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+apply from: "../../node_modules/react-native-config/android/dotenv.gradle"
 
 import com.android.build.OutputFile
 
@@ -94,13 +95,13 @@ def reactNativeArchitectures() {
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.rnpointsdkminimalintegration"
     defaultConfig {
         applicationId "com.rnpointsdkminimalintegration"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "3.4.0"
     }
@@ -184,9 +185,9 @@ dependencies {
  * Ensure all codegen artifacts are generated before any CMake configure task.
  * This avoids missing `build/generated/source/codegen/jni` directories on clean machines.
  */
-// Apply the Google Services plugin only when firebaseEnabled=true in gradle.properties.
+// Apply the Google Services plugin only when FIREBASE_ENABLED=true in the root .env file.
 // This lets the app build without a google-services.json file.
-if (project.hasProperty('firebaseEnabled') && firebaseEnabled.toBoolean()) {
+if (project.env.get("FIREBASE_ENABLED") == "true") {
     apply plugin: 'com.google.gms.google-services'
 }
 
