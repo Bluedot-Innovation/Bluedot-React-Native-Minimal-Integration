@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import {
   requestAllPermissions,
 } from "./helpers/permissionsHandler";
+import { initializeAirship } from './helpers/airship';
 
 import Initilize from "./components/InitializeSdk";
 import Main from "./components/Main";
@@ -15,7 +16,12 @@ import BrainAi from './components/BrainAiScreen';
 export default function App() {
 
   React.useEffect(() => {
-    requestAllPermissions();
+    const bootstrapApp = async () => {
+      await initializeAirship();
+      await requestAllPermissions();
+    };
+
+    bootstrapApp();
   }, []);
 
   return (

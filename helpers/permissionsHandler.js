@@ -2,6 +2,10 @@ import { Platform } from "react-native";
 import { request, checkMultiple, requestMultiple, PERMISSIONS, requestNotifications } from "react-native-permissions";
 import Geolocation from "@react-native-community/geolocation";
 import { OS } from "../enums";
+import {
+  isAirshipConfigured,
+  requestAirshipNotificationPermission,
+} from './airship';
 
 export const requestLocationPermissions = async () => {
   if (Platform.OS === OS.ANDROID) {
@@ -43,6 +47,11 @@ export const requestBluetoothPermissions = async () => {
 };
 
 export const requestNotificationPermissions = async () => {
+    if (isAirshipConfigured()) {
+      await requestAirshipNotificationPermission();
+      return;
+    }
+
     requestNotifications(['alert', 'sound']).then(({ status, settings }) => {
       console.log("Notification Permission Status: " + status);
     });
@@ -50,32 +59,48 @@ export const requestNotificationPermissions = async () => {
 
 export const requestAllPermissions = async () => {
   if (Platform.OS === OS.ANDROID) {
-    const currentPermissions = await checkMultiple([
-      PERMISSIONS.ANDROID.POST_NOTIFICATIONS
-    ])
-    const hasNotificationPermission = currentPermissions["android.permission.POST_NOTIFICATIONS"] === 'granted'
-
-    if (!hasNotificationPermission) {
-      requestNotifications(['alert', 'sound']).then(({ status, settings }) => {
-        console.log("Notification Permission Status: " + status);
-        requestLocationPermissions();
-      });
-    } else {
+    if (isAirshipConfigured()) {
+      await requestAirshipNotificationPermission();
       await requestLocationPermissions();
+    } else {
+      const currentPermissions = await checkMultiple([
+        PERMISSIONS.ANDROID.POST_NOTIFICATIONS
+      ])
+      const hasNotificationPermission = currentPermissions["android.permission.POST_NOTIFICATIONS"] === 'granted'
+
+      if (!hasNotificationPermission) {
+        requestNotifications(['alert', 'sound']).then(({ status, settings }) => {
+          console.log("Notification Permission Status: " + status);
+          requestLocationPermissions();
+        });
+      } else {
+        await requestLocationPermissions();
+      }
     }
   }
 
   if (Platform.OS === OS.IOS) {
     await requestBluetoothPermissions();
-    requestNotifications(['alert', 'sound']).then(({ status, settings }) => {
-      console.log("Notification Permission Status: " + status);
+
+    if (isAirshipConfigured()) {
+      await requestAirshipNotificationPermission();
 
       Geolocation.setRNConfiguration({
         skipPermissionRequests: false,
         authorizationLevel: 'whenInUse',
       });
       Geolocation.requestAuthorization();
-    });
+    } else {
+      requestNotifications(['alert', 'sound']).then(({ status, settings }) => {
+        console.log("Notification Permission Status: " + status);
+
+        Geolocation.setRNConfiguration({
+          skipPermissionRequests: false,
+          authorizationLevel: 'whenInUse',
+        });
+        Geolocation.requestAuthorization();
+      });
+    }
   }
 };
 

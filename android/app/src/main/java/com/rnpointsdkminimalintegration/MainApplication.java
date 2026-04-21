@@ -3,7 +3,10 @@ package com.rnpointsdkminimalintegration;
 import static com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative;
 import static com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
 import android.app.Application;
@@ -21,6 +24,8 @@ import java.io.IOException;
 import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
+
+  private static final String AIRSHIP_DEFAULT_CHANNEL_ID = "BluedotSDK";
 
   private final ReactNativeHost mReactNativeHost =
       new ReactNativeHostWrapper(this, new DefaultReactNativeHost(this) {
@@ -64,6 +69,7 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     loadReactNative(this);
+    createDefaultNotificationChannel();
     ApplicationLifecycleDispatcher.onApplicationCreate(this);
   }
 
@@ -71,5 +77,24 @@ public class MainApplication extends Application implements ReactApplication {
   public void onConfigurationChanged(@NonNull Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig);
+  }
+
+  private void createDefaultNotificationChannel() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return;
+    }
+
+    NotificationManager notificationManager = getSystemService(NotificationManager.class);
+    if (notificationManager == null || notificationManager.getNotificationChannel(AIRSHIP_DEFAULT_CHANNEL_ID) != null) {
+      return;
+    }
+
+    NotificationChannel channel = new NotificationChannel(
+        AIRSHIP_DEFAULT_CHANNEL_ID,
+        getString(R.string.airship_default_channel_name),
+        NotificationManager.IMPORTANCE_DEFAULT
+    );
+    channel.setDescription(getString(R.string.airship_default_channel_description));
+    notificationManager.createNotificationChannel(channel);
   }
 }

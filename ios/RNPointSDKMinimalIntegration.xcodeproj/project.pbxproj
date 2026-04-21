@@ -512,8 +512,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 516DFD46D4390A72B5F15584 /* Pods-RNPointSDKMinimalIntegration.debug.xcconfig */;
 			buildSettings = {
+				APS_ENVIRONMENT = development;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = 9H7C75E224;
 				ENABLE_BITCODE = NO;
@@ -547,8 +549,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 56728BBC4B08D35B3CBCF73F /* Pods-RNPointSDKMinimalIntegration.release.xcconfig */;
 			buildSettings = {
+				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = 9H7C75E224;
 				INFOPLIST_FILE = RNPointSDKMinimalIntegration/Info.plist;
