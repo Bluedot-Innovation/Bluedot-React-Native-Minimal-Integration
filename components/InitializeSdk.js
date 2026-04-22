@@ -4,8 +4,56 @@ import { useNavigate } from "react-router";
 import { Button, Text, TextInput, View, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { sendLocalNotification } from "../helpers/notifications";
 import styles from "../styles";
+import Airship from "@ua/react-native-airship";
 
 const PROJECTID = "YOUR_PROJECT_ID_GOES_HERE";
+
+class CustomEvent {
+  constructor(name, eventValue = null, properties = {}) {
+    this.name = name;
+    this.eventValue = eventValue;
+    this.properties = properties;
+  }
+
+  track() {
+    console.log(`Tracking event: ${this.name} with properties: ${this.properties}`);
+
+    if (Airship?.analytics?.addCustomEvent) {
+      Airship.analytics.addCustomEvent({
+        eventName: this.name,
+        value: this.eventValue,
+        properties: this.properties,
+      }).catch((error) => {
+        console.log("Failed to track Airship custom event", error);
+      });
+    }
+  }
+}
+
+CustomEvent.Builder = class {
+  constructor(name) {
+    this.name = name;
+    this.eventValue = null;
+    this.properties = {};
+  }
+
+  setEventValue(value) {
+    this.eventValue = value;
+    return this;
+  }
+
+   addProperty(key, value) {
+    if (key == null || key === "") {
+      return this;
+    }
+    this.properties[key] = value;
+    return this;
+  }
+
+  build() {
+    return new CustomEvent(this.name, this.eventValue, this.properties);
+  }
+};
 
 export default function Initialize() {
   const [projectId, setProjectId] = useState(PROJECTID);
@@ -42,6 +90,9 @@ export default function Initialize() {
   }, [isSdkInitialized]);
 
   const registerBluedotListeners = () => {
+
+  console.log("Registering Bluedot Listeners");
+
     BluedotPointSdk.on("enterZone", (event) => {
       const message = `You have checked in ${event.zoneInfo.name}`;
       sendLocalNotification(message);
@@ -53,6 +104,12 @@ export default function Initialize() {
         console.log(message);
         console.log(JSON.stringify(metadata))
       });
+     const zoneId = event.zoneInfo.id;
+
+      const customEvent = new CustomEvent.Builder("rezolve_entry")
+                .addProperty("zone_id", zoneId)
+                .build();
+       customEvent.track();
     });
 
     BluedotPointSdk.on("exitZone", (event) => {
