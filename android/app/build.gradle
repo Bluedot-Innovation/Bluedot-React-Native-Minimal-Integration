@@ -1,5 +1,11 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+apply from: "../../node_modules/react-native-config/android/dotenv.gradle"
+// Apply the Google Services plugin only when FIREBASE_ENABLED=true in the root .env file.
+// This lets the app build without a google-services.json file.
+if (project.env.get("FIREBASE_ENABLED") == "true") {
+    apply plugin: 'com.google.gms.google-services'
+}
 
 import com.android.build.OutputFile
 
@@ -94,13 +100,13 @@ def reactNativeArchitectures() {
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.rnpointsdkminimalintegration"
     defaultConfig {
         applicationId "com.rnpointsdkminimalintegration"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "3.4.0"
     }
@@ -136,7 +142,7 @@ android {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
     buildFeatures {
@@ -164,11 +170,31 @@ android {
     }
 }
 
+def gitlabPipelineId = project.findProperty('gitlabPipelineId') ?: ''
+def sdkDependency
+def pointSdkDependency
+if (gitlabPipelineId) {
+    sdkDependency      = "au.com.bluedot:pushnotifications:${gitlabPipelineId}"
+    pointSdkDependency = "au.com.bluedot:pointsdk:${gitlabPipelineId}"
+} else {
+    sdkDependency      = 'com.gitlab.bluedotio.android:pushnotifications:18.0.0'
+    pointSdkDependency = 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
+
+    // DEV - to load a package from plugin subfolder we clone plugin's repo and install it as android dependency - to be removed in production
+    implementation project(':bluedot-react-native-pushnotifications') 
+
+    // Optional - only use when you want to use your own implementation of FirebaseMessagingService.
+    // Otherwise the default implementation provided by the bluedot-react-native-pushnotifications package will be used.
+    implementation sdkDependency
+    implementation pointSdkDependency
+    implementation platform("com.google.firebase:firebase-bom:34.12.0")
+    implementation "com.google.firebase:firebase-messaging"
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -176,7 +202,6 @@ dependencies {
         implementation jscFlavor
     }
 }
-
 
 /**
  * CI safety for RN New Architecture:
