@@ -93,7 +93,7 @@ export default function Initialize() {
 
   console.log("Registering Bluedot Listeners");
 
-    BluedotPointSdk.on("enterZone", async (event) => {
+    BluedotPointSdk.on("enterZone",  (event) => {
       const message = `You have checked in ${event.zoneInfo.name}`;
       sendLocalNotification(message);
       console.log(`entered: ${JSON.stringify(event)}`);
@@ -106,14 +106,14 @@ export default function Initialize() {
       });
      const zoneId = event.zoneInfo.id;
 
-    const flying = await Airship.isFlying();
-     if (flying) {
+   // const flying = await Airship.isFlying();
+    // if (flying) {
          console.log("Airship is flying, tracking custom event for zone entry");
          const customEvent = new CustomEvent.Builder("rezolve_entry")
                 .addProperty("zone_id", zoneId)
                 .build();
           customEvent.track();
-        }
+      //  }
     });
 
 
