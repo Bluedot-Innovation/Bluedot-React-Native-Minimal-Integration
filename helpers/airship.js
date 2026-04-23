@@ -20,9 +20,8 @@ const registerAirshipListeners = () => {
 
   Airship.addListener(EventType.ChannelCreated, ({ channelId }) => {
     console.log('[Airship] Channel created (event):', channelId);
-    if (channelId && channelIdResolve) {
-      channelIdResolve(channelId);
-      channelIdResolve = null;
+    if (channelId) {
+       console.log('[Airship] Channel ID is valid:', channelId);
     }
   });
 
@@ -75,19 +74,15 @@ export const initializeAirship = async () => {
       // even if Autopilot already initialized Airship natively.
       registerAirshipListeners();
 
-      const isFlying = await Airship.isFlying();
-
+      const isFlying = await Airship.isFlying() === true;
       console.log('[Airship] isFlying:', isFlying);
+
       Airship.push.setUserNotificationsEnabled(true);
       await Airship.push.enableUserNotifications();
 
       await configurePlatformPushBehavior();
 
       try {
-
-        const isNotificationEnabled = await AirshipAndroid.isNotificationChannelEnabled();
-        console.log('[Airship] Android notification enabled:', isNotificationChannelEnabled);
-
         const notificationStatus = await Airship.push.getNotificationStatus();
         console.log('[Airship] Notification status:', JSON.stringify(notificationStatus));
 
