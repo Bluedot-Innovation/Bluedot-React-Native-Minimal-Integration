@@ -10,6 +10,46 @@ import Config from 'react-native-config';
 let listenersRegistered = false;
 let initializationPromise = null;
 
+const getAirshipConfig = () => {
+  const defaultEnvironment = buildEnvironment(
+    Config.AIRSHIP_DEV_APP_KEY,
+    Config.AIRSHIP_DEV_APP_SECRET,
+  );
+  const developmentEnvironment = buildEnvironment(
+    Config.AIRSHIP_DEV_APP_KEY,
+    Config.AIRSHIP_DEV_APP_SECRET,
+  );
+  const productionEnvironment = buildEnvironment(
+    Config.AIRSHIP_PROD_APP_KEY,
+    Config.AIRSHIP_PROD_APP_SECRET,
+  );
+
+  if (!defaultEnvironment && !developmentEnvironment && !productionEnvironment) {
+    return null;
+  }
+
+  const site = Config.AIRSHIP_SITE?.toLowerCase() === 'eu' ? 'eu' : 'us';
+  const config = { site, inProduction: !__DEV__ };
+
+  if (defaultEnvironment) config.default = defaultEnvironment;
+  if (developmentEnvironment) config.development = developmentEnvironment;
+  if (productionEnvironment) config.production = productionEnvironment;
+
+  if (Platform.OS === 'android') {
+    config.android = {
+      notificationConfig: {
+        defaultChannelId:
+          Config.AIRSHIP_ANDROID_CHANNEL_ID || DEFAULT_ANDROID_CHANNEL_ID,
+      },
+      fcmEnabled: true,
+    };
+  }
+
+  config.urlAllowListScopeOpenUrl = ['*'];
+  config.isChannelCaptureEnabled = true;
+  return config;
+};
+
 const registerAirshipListeners = () => {
   console.log('[Airship] registerAirshipListeners called:');
   if (listenersRegistered) {
@@ -68,14 +108,22 @@ export const initializeAirship = async () => {
   }
 
   initializationPromise = (async () => {
-
+  const config = getAirshipConfig();
     try {
       // Register listeners FIRST so ChannelCreated event is never missed,
       // even if Autopilot already initialized Airship natively.
       registerAirshipListeners();
 
-      const isFlying = await Airship.isFlying() === true;
+     const isFlying = await Airship.isFlying();
       console.log('[Airship] isFlying:', isFlying);
+
+      if (!isFlying) {
+        console.log('[Airship] Taking off...');
+        await Airship.takeOff(config);   // ← fix: takeOff restored
+        console.log('[Airship] Takeoff successful');
+      } else {
+        console.log('[Airship] Already flying');
+      }
 
       Airship.push.setUserNotificationsEnabled(true);
       await Airship.push.enableUserNotifications();
