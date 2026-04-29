@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		113CB903C39997A8696C471B /* libPods-RNPointSDKMinimalIntegration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 24CB501EE3A8B7A79D4687E2 /* libPods-RNPointSDKMinimalIntegration.a */; };
-		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2643E886923C02939726A38E /* libPods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA19DBA6CC79FC20B458F123 /* libPods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests.a */; };
@@ -17,6 +16,7 @@
 		49AEE1865B0FEB87301D8F61 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E192B6561AC58CAF5420114 /* ExpoModulesProvider.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		83F708B789E1E1F42C30F5FD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CEAF03437A14DC41B357E18C /* PrivacyInfo.xcprivacy */; };
+		E1B6CAE12FA19C3D00752982 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E1B6CAE02FA19C3D00752982 /* AppDelegate.m */; };
 		E293EBD6794212D01AD14C6A /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE27A3DE2168500951657180 /* ExpoModulesProvider.swift */; };
 /* End PBXBuildFile section */
 
@@ -33,7 +33,6 @@
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* RNPointSDKMinimalIntegration.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RNPointSDKMinimalIntegration.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = RNPointSDKMinimalIntegration/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = RNPointSDKMinimalIntegration/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = RNPointSDKMinimalIntegration/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RNPointSDKMinimalIntegration/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RNPointSDKMinimalIntegration/main.m; sourceTree = "<group>"; };
@@ -50,6 +49,7 @@
 		8E192B6561AC58CAF5420114 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		CEAF03437A14DC41B357E18C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = RNPointSDKMinimalIntegration/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DE27A3DE2168500951657180 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		E1B6CAE02FA19C3D00752982 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = RNPointSDKMinimalIntegration/AppDelegate.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FA19DBA6CC79FC20B458F123 /* libPods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -78,7 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
+				E1B6CAE02FA19C3D00752982 /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				30F48B9B29A5FE6B00D2225D /* AppCenter-Config.plist */,
@@ -306,9 +306,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -345,9 +349,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -384,9 +392,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -447,9 +459,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -482,9 +498,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				E293EBD6794212D01AD14C6A /* ExpoModulesProvider.swift in Sources */,
+				E1B6CAE12FA19C3D00752982 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,7 +539,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.4.1;
+				MARKETING_VERSION = 3.5.0;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(inherited)",
 					"-DRCT_NEW_ARCH_ENABLED=1",
@@ -557,7 +573,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.4.1;
+				MARKETING_VERSION = 3.5.0;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(inherited)",
 					"-DNDEBUG",

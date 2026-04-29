@@ -2009,7 +2009,7 @@ PODS:
     - Yoga
   - react-native-geolocation (2.1.0):
     - React-Core
-  - react-native-plugin (3.4.1):
+  - react-native-plugin (3.5.0):
     - BluedotPointSDK (= 17.1.0)
     - React
   - react-native-render-html (6.3.4):
