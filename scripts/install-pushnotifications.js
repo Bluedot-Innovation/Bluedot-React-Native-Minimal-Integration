@@ -13,12 +13,13 @@ const path = require('path');
 const os = require('os');
 
 const REPO = 'git@github.com:Bluedot-Innovation/Bluedot-React-Native-Plugin.git';
-const BRANCH = 'dev/push';
+const BRANCH = 'ak/18.0.0-cleanup';
 const SUBDIR = 'bluedot-react-native-pushnotifications';
 const TARGET = path.resolve(__dirname, '..', 'node_modules', SUBDIR);
 
-// Skip if already installed with a valid package.json
-if (fs.existsSync(path.join(TARGET, 'package.json'))) {
+// Skip if already installed with a valid package.json AND versions.gradle is present
+const versionsGradlePath = path.resolve(__dirname, '..', 'node_modules', 'versions.gradle');
+if (fs.existsSync(path.join(TARGET, 'package.json')) && fs.existsSync(versionsGradlePath)) {
   console.log(`✓ ${SUBDIR} already installed, skipping`);
   process.exit(0);
 }
@@ -45,6 +46,18 @@ try {
 
   fs.rmSync(TARGET, { recursive: true, force: true });
   fs.cpSync(path.join(tmpDir, SUBDIR), TARGET, { recursive: true });
+
+  // Copy versions.gradle from repo root — the plugin's build.gradle references it via '../../versions.gradle'
+  // which resolves to node_modules/versions.gradle when installed as an npm package.
+  const versionsGradleSrc = path.join(tmpDir, 'versions.gradle');
+  const versionsGradleDest = path.resolve(__dirname, '..', 'node_modules', 'versions.gradle');
+  if (fs.existsSync(versionsGradleSrc)) {
+    fs.copyFileSync(versionsGradleSrc, versionsGradleDest);
+    console.log(`✓ versions.gradle copied to node_modules/`);
+  } else {
+    console.warn(`⚠ versions.gradle not found in repo root, creating empty placeholder`);
+    fs.writeFileSync(versionsGradleDest, '// versions.gradle placeholder\n');
+  }
 
   console.log(`✓ ${SUBDIR} installed successfully`);
 } catch (err) {
