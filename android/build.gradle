@@ -34,21 +34,3 @@ buildscript {
     }
 }
 
-allprojects {
-    def gitlabMavenToken = project.findProperty('gitlabMavenToken') ?: ''
-    def gitlabPipelineId = project.findProperty('gitlabPipelineId') ?: ''
-    if (gitlabPipelineId) {
-        repositories {
-            maven {
-                url 'https://gitlab.com/api/v4/projects/14682665/packages/maven'
-                credentials(HttpHeaderCredentials) {
-                    name  'Private-Token'
-                    value gitlabMavenToken
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
-            }
-        }
-    }
-}
