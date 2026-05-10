@@ -7,7 +7,11 @@ if (project.env.get("PUSH_ENABLED") == "true") {
     apply plugin: 'com.google.gms.google-services'
 }
 
-import com.android.build.OutputFile
+// PUSH_ANDROID_OVERRIDE=true  → include CustomMessagingService + Firebase push deps (current behaviour)
+// PUSH_ANDROID_OVERRIDE=false → strip them out (leaner build, no Firebase push at runtime)
+def pushAndroidOverride = project.env.get("PUSH_ANDROID_OVERRIDE") == "true"
+
+import com.android.build.api.variant.FilterConfiguration
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -98,44 +102,44 @@ def reactNativeArchitectures() {
 }
 
 android {
-    ndkVersion rootProject.ext.ndkVersion
+    ndkVersion = rootProject.ext.ndkVersion
 
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
-    namespace "com.rnpointsdkminimalintegration"
+    namespace = "com.rnpointsdkminimalintegration"
     defaultConfig {
-        applicationId "com.rnpointsdkminimalintegration"
-        minSdk rootProject.ext.minSdkVersion
-        targetSdk rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "3.4.0"
+        applicationId = "com.rnpointsdkminimalintegration"
+        minSdk = rootProject.ext.minSdkVersion
+        targetSdk = rootProject.ext.targetSdkVersion
+        versionCode = 1
+        versionName = "3.4.0"
     }
 
     splits {
         abi {
             reset()
-            enable enableSeparateBuildPerCPUArchitecture
-            universalApk false  // If true, also generate a universal APK
+            enable = enableSeparateBuildPerCPUArchitecture
+            universalApk = false  // If true, also generate a universal APK
             include (*reactNativeArchitectures())
         }
     }
     signingConfigs {
         debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+            storeFile = file('debug.keystore')
+            storePassword = 'android'
+            keyAlias = 'androiddebugkey'
+            keyPassword = 'android'
         }
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
+            signingConfig = signingConfigs.debug
+            minifyEnabled = enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
@@ -146,26 +150,52 @@ android {
         }
     }
     buildFeatures {
-        buildConfig true
-        compose true
+        buildConfig = true
+        compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion rootProject.ext.composeVersion
+        kotlinCompilerExtensionVersion = rootProject.ext.composeVersion
     }        
 
-    // applicationVariants are e.g. debug, release
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            // For each separate APK per architecture, set a unique version code as described here:
-            // https://developer.android.com/studio/build/configure-apk-splits.html
-            // Example: versionCode 1 will generate 1001 for armeabi-v7a, 1002 for x86, etc.
-            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
-            def abi = output.getFilter(OutputFile.ABI)
-            if (abi != null) {  // null for the universal-debug, universal-release variants
-                output.versionCodeOverride =
-                        defaultConfig.versionCode * 1000 + versionCodes.get(abi)
+    // ---------------------------------------------------------------------------
+    // Conditionally switch between the two MainApplication variants and include
+    // CustomMessagingService based on PUSH_ANDROID_OVERRIDE flag.
+    //
+    // src/pushOverride/java  – MainApplication WITH ServiceManager + CustomMessagingService
+    // src/pushDefault/java  – MainApplication WITHOUT ServiceManager (no Firebase push deps)
+    //
+    // src/main/java intentionally does NOT contain MainApplication.java; it is
+    // provided exclusively by one of the two conditional source sets above.
+    // ---------------------------------------------------------------------------
+    sourceSets {
+        main {
+            if (pushAndroidOverride) {
+                java.srcDirs += ['src/pushOverride/java']
+            } else {
+                java.srcDirs += ['src/pushDefault/java']
             }
+        }
+    }
 
+}
+
+// For each separate APK per architecture, set a unique version code as described here:
+// https://developer.android.com/studio/build/configure-apk-splits.html
+// Example: versionCode 1 will generate 1001 for armeabi-v7a, 1002 for x86, etc.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        if (pushAndroidOverride) {
+            variant.sources.manifests.addStaticManifestFile('src/pushOverride/AndroidManifest.xml')
+        }
+
+        def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
+        variant.outputs.each { output ->
+            def abi = output.filters.find {
+                it.filterType == FilterConfiguration.FilterType.ABI
+            }?.identifier
+            if (abi != null) {
+                output.versionCode.set(defaultConfig.versionCode * 1000 + versionCodes.get(abi))
+            }
         }
     }
 }
@@ -178,12 +208,14 @@ dependencies {
     // DEV - to load a package from plugin subfolder we clone plugin's repo and install it as android dependency - to be removed in production
     implementation project(':bluedot-react-native-pushnotifications') 
 
-    // Optional - only use next four declarations when you want to use your own implementation of FirebaseMessagingService.
-    // Otherwise the default implementation provided by the bluedot-react-native-pushnotifications package will be used.
-    implementation 'com.gitlab.bluedotio.android:point_sdk_push:18.0.0'
-    implementation 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
-    implementation platform("com.google.firebase:firebase-bom:34.12.0")
-    implementation "com.google.firebase:firebase-messaging"
+    if (pushAndroidOverride) {
+        // Optional - only use next four declarations when you want to use your own implementation of FirebaseMessagingService.
+        // Otherwise the default implementation provided by the bluedot-react-native-pushnotifications package will be used.
+        implementation 'com.gitlab.bluedotio.android:point_sdk_push:18.0.0'
+        implementation 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
+        implementation platform("com.google.firebase:firebase-bom:34.12.0")
+        implementation "com.google.firebase:firebase-messaging"
+    }
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
