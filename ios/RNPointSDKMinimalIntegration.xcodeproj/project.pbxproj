@@ -17,6 +17,7 @@
 		49AEE1865B0FEB87301D8F61 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E192B6561AC58CAF5420114 /* ExpoModulesProvider.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		83F708B789E1E1F42C30F5FD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CEAF03437A14DC41B357E18C /* PrivacyInfo.xcprivacy */; };
+		E1AD1EF22FAC7A62000A62B9 /* BluedotPushBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E1AD1EF12FAC7A58000A62B9 /* BluedotPushBridge.m */; };
 		E293EBD6794212D01AD14C6A /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE27A3DE2168500951657180 /* ExpoModulesProvider.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +51,9 @@
 		8E192B6561AC58CAF5420114 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		CEAF03437A14DC41B357E18C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = RNPointSDKMinimalIntegration/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DE27A3DE2168500951657180 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		E147567E2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = RNPointSDKMinimalIntegration.entitlements; path = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements; sourceTree = "<group>"; };
+		E1AD1EF02FAC7A39000A62B9 /* BluedotPushBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluedotPushBridge.h; sourceTree = "<group>"; };
+		E1AD1EF12FAC7A58000A62B9 /* BluedotPushBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BluedotPushBridge.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FA19DBA6CC79FC20B458F123 /* libPods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -77,6 +81,9 @@
 		13B07FAE1A68108700A75B9A /* RNPointSDKMinimalIntegration */ = {
 			isa = PBXGroup;
 			children = (
+				E147567E2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.entitlements */,
+				E1AD1EF12FAC7A58000A62B9 /* BluedotPushBridge.m */,
+				E1AD1EF02FAC7A39000A62B9 /* BluedotPushBridge.h */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -306,9 +313,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -345,9 +356,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -384,9 +399,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -447,9 +466,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -484,6 +507,7 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				E1AD1EF22FAC7A62000A62B9 /* BluedotPushBridge.m in Sources */,
 				E293EBD6794212D01AD14C6A /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -514,6 +538,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = 9H7C75E224;
 				ENABLE_BITCODE = NO;
@@ -549,6 +574,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = 9H7C75E224;
 				INFOPLIST_FILE = RNPointSDKMinimalIntegration/Info.plist;
