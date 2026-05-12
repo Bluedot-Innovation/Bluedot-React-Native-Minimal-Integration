@@ -2061,7 +2061,7 @@ PODS:
     - Yoga
   - react-native-geolocation (2.1.0):
     - React-Core
-  - react-native-plugin (3.4.1):
+  - react-native-plugin (4.0.0):
     - BluedotPointSDK (= 18.0.0)
     - React
   - react-native-render-html (6.3.4):
@@ -3140,7 +3140,7 @@ SPEC CHECKSUMS:
   React-mutationobservernativemodule: 867e9c215f21b4308fa98473f3c38585b5897e44
   react-native-config: 2249b7e68644c86ea68358f5a0d746d1c648f900
   react-native-geolocation: 2f7b974123a2240dd372c81f0bb598ca6e899952
-  react-native-plugin: dff32ccb421bb8e38d6d92ea524e560c6debca04
+  react-native-plugin: 1f9c9390894e9a4fa256fdacf2dbdc35992eb628
   react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   React-NativeModulesApple: 519f9f98375db6458a7220becd25db81b3860b76
   React-networking: 2318cba8288ec5df38e899feed3baaac0629b4bd
