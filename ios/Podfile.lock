@@ -2,7 +2,7 @@ PODS:
   - BluedotPointSDK (18.0.0)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
-  - EXApplication (55.0.14):
+  - EXApplication (55.0.15):
     - ExpoModulesCore
   - EXConstants (55.0.16):
     - ExpoModulesCore
@@ -41,9 +41,9 @@ PODS:
     - ExpoModulesCore
   - ExpoDomWebView (55.0.6):
     - ExpoModulesCore
-  - ExpoFileSystem (55.0.19):
+  - ExpoFileSystem (55.0.22):
     - ExpoModulesCore
-  - ExpoFont (55.0.7):
+  - ExpoFont (55.0.8):
     - ExpoModulesCore
   - ExpoKeepAwake (55.0.8):
     - ExpoModulesCore
@@ -84,7 +84,7 @@ PODS:
     - React-Core
     - React-runtimescheduler
     - ReactCommon
-  - ExpoSplashScreen (55.0.20):
+  - ExpoSplashScreen (55.0.21):
     - ExpoModulesCore
   - fast_float (8.0.0)
   - FBLazyVector (0.83.9)
@@ -2061,7 +2061,7 @@ PODS:
     - Yoga
   - react-native-geolocation (2.1.0):
     - React-Core
-  - react-native-plugin (4.0.0):
+  - react-native-plugin (3.5.0):
     - BluedotPointSDK (= 18.0.0)
     - React
   - react-native-render-html (6.3.4):
@@ -2777,12 +2777,12 @@ DEPENDENCIES:
   - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - Expo (from `../node_modules/expo`)
-  - ExpoAsset (from `../node_modules/expo-asset/ios`)
-  - "ExpoDomWebView (from `../node_modules/@expo/dom-webview/ios`)"
+  - ExpoAsset (from `../node_modules/expo/node_modules/expo-asset/ios`)
+  - "ExpoDomWebView (from `../node_modules/expo/node_modules/@expo/log-box/node_modules/@expo/dom-webview/ios`)"
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
-  - "ExpoLogBox (from `../node_modules/@expo/log-box`)"
+  - "ExpoLogBox (from `../node_modules/expo/node_modules/@expo/log-box`)"
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoModulesJSI (from `../node_modules/expo-modules-core`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
@@ -2891,9 +2891,9 @@ EXTERNAL SOURCES:
   Expo:
     :path: "../node_modules/expo"
   ExpoAsset:
-    :path: "../node_modules/expo-asset/ios"
+    :path: "../node_modules/expo/node_modules/expo-asset/ios"
   ExpoDomWebView:
-    :path: "../node_modules/@expo/dom-webview/ios"
+    :path: "../node_modules/expo/node_modules/@expo/log-box/node_modules/@expo/dom-webview/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
@@ -2901,7 +2901,7 @@ EXTERNAL SOURCES:
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoLogBox:
-    :path: "../node_modules/@expo/log-box"
+    :path: "../node_modules/expo/node_modules/@expo/log-box"
   ExpoModulesCore:
     :path: "../node_modules/expo-modules-core"
   ExpoModulesJSI:
@@ -3084,18 +3084,18 @@ SPEC CHECKSUMS:
   BluedotPointSDK: 4d28eeec2091d335aec4ea337ab0efd872dabe25
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
-  EXApplication: ab5a9ca485adce8be81309a5172d1565e9d7467f
+  EXApplication: 82a44fa8236bb644a805ee21e64054eeb01d22ea
   EXConstants: dadbeba983acc30f855a919658a2b34fbd86615d
   Expo: 2697fa6352e7cc1ac03bf35224324ab2b6198844
   ExpoAsset: 7721c5c4ae2a7c3c8147a046727ac6c020b05648
   ExpoDomWebView: b2e9d601f9cb77d3c97da73234e175b64be91928
-  ExpoFileSystem: 0b73b097e67c83622640168f620defc65a1a6f70
-  ExpoFont: a95606f106a6394df8edf6d0d87aab9020af5ad4
+  ExpoFileSystem: 61e663d0bbd1a973d324530d1d6ee559a5e5192c
+  ExpoFont: a7e34a75bdfb703fa07a0e87807f836236608c76
   ExpoKeepAwake: d0eb7a0719500d2a43fbf29b6f79e84d70c75ebf
   ExpoLogBox: 89b634d5a8a64c4a6a7caad8f9985a28463c7002
   ExpoModulesCore: ce6cb099bebe03b7e830f514e4aced717a555eda
   ExpoModulesJSI: 59a126dc51164e603242ee9a38c19339c5c79da0
-  ExpoSplashScreen: 3e64eed7a300d4e1131e8b419b5cea6e604adba7
+  ExpoSplashScreen: 049301b226bce8284fcafb7923fcad3a43f23a9f
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 3bcb3055086e5d90a12f0fe1668e79f6eceabc17
   fmt: 530618a01105dae0fa3a2f27c81ae11fa8f67eac
@@ -3140,7 +3140,7 @@ SPEC CHECKSUMS:
   React-mutationobservernativemodule: 867e9c215f21b4308fa98473f3c38585b5897e44
   react-native-config: 2249b7e68644c86ea68358f5a0d746d1c648f900
   react-native-geolocation: 2f7b974123a2240dd372c81f0bb598ca6e899952
-  react-native-plugin: 1f9c9390894e9a4fa256fdacf2dbdc35992eb628
+  react-native-plugin: 69fb95026ecdc1207d12fdb2eee4dc4f0783a0bd
   react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   React-NativeModulesApple: 519f9f98375db6458a7220becd25db81b3860b76
   React-networking: 2318cba8288ec5df38e899feed3baaac0629b4bd

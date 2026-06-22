@@ -313,13 +313,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -356,13 +352,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -399,13 +391,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -423,6 +411,7 @@
 			inputPaths = (
 				"$(SRCROOT)/.xcode.env",
 				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements",
 				"$(SRCROOT)/Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration/expo-configure-project.sh",
 			);
 			name = "[Expo] Configure project";
@@ -466,13 +455,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-RNPointSDKMinimalIntegration/Pods-RNPointSDKMinimalIntegration-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
