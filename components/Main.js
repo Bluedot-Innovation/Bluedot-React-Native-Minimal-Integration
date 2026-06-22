@@ -80,6 +80,7 @@ export default function Main() {
         <Button title="Tempo" onPress={() => navigate('/tempo')}/>
         <Button title="Reset SDK" onPress={handleResetSdk}/>
       </View>
+
     </View>
   );
 }

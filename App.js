@@ -5,12 +5,21 @@ import { StatusBar } from 'expo-status-bar';
 import {
   requestAllPermissions,
 } from "./helpers/permissionsHandler";
+import PushNotifications from 'bluedot-react-native-pushnotifications';
+import Toast from 'react-native-toast-message';
 
 import Initilize from "./components/InitializeSdk";
 import Main from "./components/Main";
 import GeoTriggering from "./components/GeoTriggering";
 import Tempo from "./components/Tempo";
 import PushNotifications from 'bluedot-react-native-pushnotifications';
+
+// Forward background / quit-state FCM messages to the Bluedot Push SDK.
+// if (FIREBASE_ENABLED) {
+//   messaging().setBackgroundMessageHandler(async remoteMessage => {
+//     PushNotifications.onMessageReceived(remoteMessage);
+//   });
+// }
 
 export default function App() {
 
@@ -21,11 +30,30 @@ export default function App() {
   React.useEffect(() => {
     requestAllPermissions();
 
+    // Forward FCM token updates and foreground messages to the Bluedot Push SDK.
+    // Skipped when FIREBASE_ENABLED is false (no google-services config present).
+    // const unsubscribeToken = FIREBASE_ENABLED
+    //   ? messaging().onTokenRefresh(token => { PushNotifications.onNewFcmToken(token); })
+    //   : () => {};
+
+    // const unsubscribeMessage = FIREBASE_ENABLED
+    //   ? messaging().onMessage(async remoteMessage => { PushNotifications.onMessageReceived(remoteMessage); })
+    //   : () => {};
+
+    // Listen for push notification tap/display events from Bluedot campaigns
+
     const receivedSub = PushNotifications.on(
       PushNotifications.PUSH_NOTIFICATION_RECEIVED,
       (data) => {
         console.log('[Bluedot] Push notification received:', data.title, data.campaignId);
         showPushMessage(data.title || 'Notification received', data.body || data.title);
+// =======
+//         Toast.show({
+//           type: 'info',
+//           text1: data.title || 'Notification received',
+//           text2: data.body || `${data.title}`,
+//         });
+// >>>>>>> dev/push
       }
     );
 
@@ -52,6 +80,7 @@ export default function App() {
         <Route exact path="/geotriggering" element={<GeoTriggering />} />
         <Route exact path="/tempo" element={<Tempo />} />
       </Routes>
+      <Toast />
     </NativeRouter>
   );
 }

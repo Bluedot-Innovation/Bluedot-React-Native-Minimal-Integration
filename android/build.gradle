@@ -1,14 +1,24 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+// DEV ONLY - we use local properties to load sdk internal release - remove it in production. 
+// Load secrets from local.properties so they are available via project.findProperty()
+// without being committed to version control.
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+    localProperties.each { key, value -> project.ext.set(key as String, value) }
+}
+
 buildscript {
     ext {
         buildToolsVersion = "36.0.0"
-        minSdkVersion = 26
+        minSdkVersion = 29
         compileSdkVersion = 36
         targetSdkVersion = 36
 
         ndkVersion = "27.3.13750724"
-        kotlinVersion = "2.1.20"
+        kotlinVersion = "2.3.0"
         composeVersion = "1.5.4"
     }
     repositories {
@@ -20,5 +30,25 @@ buildscript {
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("androidx.compose.compiler:compiler:${composeVersion}")
+        classpath('com.google.gms:google-services:4.4.2')
+    }
+}
+
+allprojects {
+    def gitlabMavenToken = project.findProperty('gitlabMavenToken') ?: ''
+    def gitlabPipelineId = project.findProperty('gitlabPipelineId') ?: ''
+    if (gitlabPipelineId) {
+        repositories {
+            maven {
+                url 'https://gitlab.com/api/v4/projects/14682665/packages/maven'
+                credentials(HttpHeaderCredentials) {
+                    name  'Private-Token'
+                    value gitlabMavenToken
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
+            }
+        }
     }
 }
