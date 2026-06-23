@@ -11,8 +11,10 @@ import GeoTriggering from "./components/GeoTriggering";
 import Tempo from "./components/Tempo";
 import PushNotifications from 'bluedot-react-native-pushnotifications';
 
-// Forward background / quit-state FCM messages to the Bluedot Push SDK.
-// if (FIREBASE_ENABLED) {
+// If you implement Firebase on the React Native layer, forward background/quit-state FCM messages to the Bluedot Push SDK.
+// Call this once at the module level (outside any component):
+//
+// if (PUSH_ENABLED) {
 //   messaging().setBackgroundMessageHandler(async remoteMessage => {
 //     PushNotifications.onMessageReceived(remoteMessage);
 //   });
@@ -28,12 +30,12 @@ export default function App() {
     requestAllPermissions();
 
     // Forward FCM token updates and foreground messages to the Bluedot Push SDK.
-    // Skipped when FIREBASE_ENABLED is false (no google-services config present).
-    // const unsubscribeToken = FIREBASE_ENABLED
+    // Skipped when PUSH_ENABLED is false (no google-services config present).
+    // const unsubscribeToken = PUSH_ENABLED
     //   ? messaging().onTokenRefresh(token => { PushNotifications.onNewFcmToken(token); })
     //   : () => {};
 
-    // const unsubscribeMessage = FIREBASE_ENABLED
+    // const unsubscribeMessage = PUSH_ENABLED
     //   ? messaging().onMessage(async remoteMessage => { PushNotifications.onMessageReceived(remoteMessage); })
     //   : () => {};
 
