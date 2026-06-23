@@ -177,7 +177,7 @@ if (gitlabPipelineId) {
     sdkDependency      = "au.com.bluedot:pushnotifications:${gitlabPipelineId}"
     pointSdkDependency = "au.com.bluedot:pointsdk:${gitlabPipelineId}"
 } else {
-    sdkDependency      = 'com.gitlab.bluedotio.android:pushnotifications:18.0.0'
+    sdkDependency      = 'com.gitlab.bluedotio.android:point_sdk_push:18.0.0'
     pointSdkDependency = 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
 }
 

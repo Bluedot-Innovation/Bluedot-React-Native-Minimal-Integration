@@ -2,10 +2,7 @@ import React from 'react';
 import { Alert } from 'react-native';
 import { NativeRouter, Route, Routes } from "react-router-native";
 import { StatusBar } from 'expo-status-bar';
-import {
-  requestAllPermissions,
-} from "./helpers/permissionsHandler";
-import PushNotifications from 'bluedot-react-native-pushnotifications';
+import { requestAllPermissions } from "./helpers/permissionsHandler";
 import Toast from 'react-native-toast-message';
 
 import Initilize from "./components/InitializeSdk";
