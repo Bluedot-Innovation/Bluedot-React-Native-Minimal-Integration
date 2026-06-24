@@ -32,7 +32,9 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-splash-screen",
+      "expo-status-bar"
     ]
   },
   "displayName": "React Native Point SDK Minimal Integration",

@@ -46,13 +46,6 @@ export default function App() {
       (data) => {
         console.log('[Bluedot] Push notification received:', data.title, data.campaignId);
         showPushMessage(data.title || 'Notification received', data.body || data.title);
-// =======
-//         Toast.show({
-//           type: 'info',
-//           text1: data.title || 'Notification received',
-//           text2: data.body || `${data.title}`,
-//         });
-// >>>>>>> dev/push
       }
     );
 
