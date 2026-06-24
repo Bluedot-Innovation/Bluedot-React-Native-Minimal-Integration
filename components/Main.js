@@ -24,6 +24,10 @@ export default function Main() {
       console.log(JSON.stringify(event))
     });
 
+    BluedotPointSdk.unsubscribe("dwellZone", (event) => {
+      console.log(JSON.stringify(event))
+    });
+
     BluedotPointSdk.unsubscribe("zoneInfoUpdate", () => {
     });
 
