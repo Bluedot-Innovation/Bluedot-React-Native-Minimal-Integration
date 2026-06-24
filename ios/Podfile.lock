@@ -2653,7 +2653,7 @@ PODS:
     - Yoga
   - RNCPushNotificationIOS (1.12.0):
     - React-Core
-  - RNGestureHandler (2.30.1):
+  - RNGestureHandler (3.0.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -3177,7 +3177,7 @@ SPEC CHECKSUMS:
   ReactCommon: 5f2db7556b60816bdc5761a359539bacd2d0250d
   RNCAsyncStorage: 29f0230e1a25f36c20b05f65e2eb8958d6526e82
   RNCPushNotificationIOS: 85957a0534fd1309b4c028ccbe5b1baf9ab5cf57
-  RNGestureHandler: b407c25a3f51d22dd7430e6b530f753f112b7e77
+  RNGestureHandler: 70d7c8cd6de51cff63c68789b04a1e03f1b9eef3
   RNPermissions: 4555a4166694317729bf7fd6ef25c548c696ffe8
   RNScreens: afaf526a9c804c3b4503f950cf3e67ed81e29ada
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
