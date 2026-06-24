@@ -51,7 +51,8 @@
 		8E192B6561AC58CAF5420114 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration-RNPointSDKMinimalIntegrationTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		CEAF03437A14DC41B357E18C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = RNPointSDKMinimalIntegration/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DE27A3DE2168500951657180 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		E147567E2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = RNPointSDKMinimalIntegration.entitlements; path = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements; sourceTree = "<group>"; };
+		E147567E2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.development.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = RNPointSDKMinimalIntegration.development.entitlements; path = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.development.entitlements; sourceTree = "<group>"; };
+		E147567F2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.production.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = RNPointSDKMinimalIntegration.production.entitlements; path = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.production.entitlements; sourceTree = "<group>"; };
 		E1AD1EF02FAC7A39000A62B9 /* BluedotPushBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluedotPushBridge.h; sourceTree = "<group>"; };
 		E1AD1EF12FAC7A58000A62B9 /* BluedotPushBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BluedotPushBridge.m; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -81,7 +82,8 @@
 		13B07FAE1A68108700A75B9A /* RNPointSDKMinimalIntegration */ = {
 			isa = PBXGroup;
 			children = (
-				E147567E2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.entitlements */,
+				E147567E2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.development.entitlements */,
+				E147567F2FAC8C9B007856E7 /* RNPointSDKMinimalIntegration.production.entitlements */,
 				E1AD1EF12FAC7A58000A62B9 /* BluedotPushBridge.m */,
 				E1AD1EF02FAC7A39000A62B9 /* BluedotPushBridge.h */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -411,7 +413,7 @@
 			inputPaths = (
 				"$(SRCROOT)/.xcode.env",
 				"$(SRCROOT)/.xcode.env.local",
-				"$(SRCROOT)/RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements",
+				"$(SRCROOT)/RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.development.entitlements",
 				"$(SRCROOT)/Pods/Target Support Files/Pods-RNPointSDKMinimalIntegration/expo-configure-project.sh",
 			);
 			name = "[Expo] Configure project";
@@ -523,7 +525,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements;
+				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.development.entitlements;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = 9H7C75E224;
 				ENABLE_BITCODE = NO;
@@ -559,7 +561,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.entitlements;
+				CODE_SIGN_ENTITLEMENTS = RNPointSDKMinimalIntegration/RNPointSDKMinimalIntegration.production.entitlements;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = 9H7C75E224;
 				INFOPLIST_FILE = RNPointSDKMinimalIntegration/Info.plist;

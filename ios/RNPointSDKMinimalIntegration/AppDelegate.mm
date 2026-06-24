@@ -27,7 +27,11 @@
 {
   BOOL shouldPresent = [BluedotPushBridge handleForegroundNotification:notification];
   
-  completionHandler(UNNotificationPresentationOptionSound | UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner | UNNotificationPresentationOptionBadge);
+  UNNotificationPresentationOptions options = shouldPresent
+  ? (UNNotificationPresentationOptionSound | UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner | UNNotificationPresentationOptionBadge)
+  : UNNotificationPresentationOptionNone;
+  
+  completionHandler(options);
 }
 
 // Required for the register event.
