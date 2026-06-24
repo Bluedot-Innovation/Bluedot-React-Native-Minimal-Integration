@@ -1,9 +1,9 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
 apply from: "../../node_modules/react-native-config/android/dotenv.gradle"
-// Apply the Google Services plugin only when FIREBASE_ENABLED=true in the root .env file.
+// Apply the Google Services plugin only when PUSH_ENABLED=true in the root .env file.
 // This lets the app build without a google-services.json file.
-if (project.env.get("FIREBASE_ENABLED") == "true") {
+if (project.env.get("PUSH_ENABLED") == "true") {
     apply plugin: 'com.google.gms.google-services'
 }
 
@@ -162,23 +162,11 @@ android {
             def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
             def abi = output.getFilter(OutputFile.ABI)
             if (abi != null) {  // null for the universal-debug, universal-release variants
-                output.versionCodeOverride =
-                        defaultConfig.versionCode * 1000 + versionCodes.get(abi)
+                output.versionCodeOverride = defaultConfig.versionCode * 1000 + versionCodes.get(abi)
             }
 
         }
     }
-}
-
-def gitlabPipelineId = project.findProperty('gitlabPipelineId') ?: ''
-def sdkDependency
-def pointSdkDependency
-if (gitlabPipelineId) {
-    sdkDependency      = "au.com.bluedot:pushnotifications:${gitlabPipelineId}"
-    pointSdkDependency = "au.com.bluedot:pointsdk:${gitlabPipelineId}"
-} else {
-    sdkDependency      = 'com.gitlab.bluedotio.android:pushnotifications:18.0.0'
-    pointSdkDependency = 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
 }
 
 dependencies {
@@ -189,10 +177,10 @@ dependencies {
     // DEV - to load a package from plugin subfolder we clone plugin's repo and install it as android dependency - to be removed in production
     implementation project(':bluedot-react-native-pushnotifications') 
 
-    // Optional - only use when you want to use your own implementation of FirebaseMessagingService.
+    // Optional - only use next four declarations when you want to use your own implementation of FirebaseMessagingService.
     // Otherwise the default implementation provided by the bluedot-react-native-pushnotifications package will be used.
-    implementation sdkDependency
-    implementation pointSdkDependency
+    implementation 'com.gitlab.bluedotio.android:point_sdk_push:18.0.0'
+    implementation 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
     implementation platform("com.google.firebase:firebase-bom:34.12.0")
     implementation "com.google.firebase:firebase-messaging"
 
