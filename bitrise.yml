@@ -1,0 +1,1501 @@
+---
+format_version: '11'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+workflows:
+  testing:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        title: 18.0.0 Inject google-services.json
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "$GOOGLE_SERVICES_JSON" > "$BITRISE_SOURCE_DIR/android/app/google-services.json"
+            echo "google-services.json written successfully."
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '21'
+    - nvm@1:
+        inputs:
+        - node_version: 24.11.0
+    - install-missing-android-tools@3.2: {}
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - module: app
+        - arguments: ''
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - script@1:
+        title: Remove existing pods
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            rm -f ./ios/Podfile.lock
+    - script@1:
+        title: Setup Ruby 3.3.1 with asdf
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            rm -f "$BITRISE_SOURCE_DIR/.ruby-version"
+            unset RBENV_VERSION
+            RUBY_VERSION=3.3.1
+            asdf install ruby $RUBY_VERSION
+            asdf global ruby $RUBY_VERSION
+    - cocoapods-install@2:
+        inputs:
+        - verbose: 'true'
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios"
+    - set-xcode-build-number@2:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$IOS_INFO_PLIST"
+    - xcode-archive@5:
+        inputs:
+        - automatic_code_signing: api-key
+        - compile_bitcode: 'no'
+        - upload_bitcode: 'no'
+        - configuration: Release
+        - distribution_method: ad-hoc
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+  deploy_googleplay:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "$GOOGLE_SERVICES_JSON" > "$BITRISE_SOURCE_DIR/android/app/google-services.json"
+            echo "google-services.json written successfully."
+        title: 18.0.0 Inject google-services.json
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '21'
+    - install-missing-android-tools@3: {}
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - module: app
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+        - build_type: aab
+    - sign-apk@2:
+        inputs:
+        - use_apk_signer: 'true'
+        - keystore_url: "$KEYSTORE_PATH"
+        - keystore_password: "$KEYSTORE_PWD"
+        - keystore_alias: "$KEYSTORE_ALIAS"
+        - private_key_password: "$KEYSTORE_PWD"
+        - android_app: "$BITRISE_AAB_PATH"
+    - google-play-deploy@3:
+        inputs:
+        - service_account_json_key_path: "$GOOGLE_PLAY_SERVICE_KEY_DESTINATION_PATH"
+        - package_name: com.rnpointsdkminimalintegration
+        - track: internal
+        - status: draft
+        - app_path: "$BITRISE_SIGNED_AAB_PATH"
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+  deploy_testflight_and_googleplay:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "$GOOGLE_SERVICES_JSON" > "$BITRISE_SOURCE_DIR/android/app/google-services.json"
+            echo "google-services.json written successfully."
+        title: 18.0.0 Inject google-services.json
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '21'
+    - install-missing-android-tools@3: {}
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - module: app
+        - arguments: ''
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - sign-apk@2:
+        inputs:
+        - use_apk_signer: 'true'
+    - deploy-to-updraft@0:
+        inputs:
+        - api_key: "$UPDRAFT_API_KEY"
+        - app_key: "$UPDRAFT_APP_KEY"
+        - app_path: "$BITRISE_APK_PATH"
+    - script@1:
+        title: Remove existing pods
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            rm -f ./ios/Podfile.lock
+        is_always_run: true
+    - script@1:
+        title: Setup Ruby 3.3.1 with asdf
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            rm -f "$BITRISE_SOURCE_DIR/.ruby-version"
+            unset RBENV_VERSION
+            RUBY_VERSION=3.3.1
+            asdf install ruby $RUBY_VERSION
+            asdf global ruby $RUBY_VERSION
+    - cocoapods-install@2:
+        inputs:
+        - verbose: 'true'
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios"
+        is_always_run: true
+    - set-xcode-build-number@2:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$IOS_INFO_PLIST"
+        is_always_run: true
+    - xcode-archive@5:
+        inputs:
+        - automatic_code_signing: api-key
+        - compile_bitcode: 'no'
+        - upload_bitcode: 'no'
+        - configuration: Release
+        - distribution_method: ad-hoc
+        is_always_run: true
+    - deploy-to-itunesconnect-deliver@2:
+        inputs:
+        - connection: api_key
+        - app_id: "$APPSTORE_ID"
+        is_always_run: true
+    - deploy-to-updraft@0:
+        inputs:
+        - app_key: "$UPDRAFT_APP_KEY_IOS"
+        - api_key: "$UPDRAFT_API_KEY"
+        - app_path: "$BITRISE_IPA_PATH"
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+    - slack@4:
+        inputs:
+        - channel: "$SLACK_CHANNEL"
+        - emoji: ":tada:"
+        - from_username: React Native Min App
+        - footer:
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: "$SLACK_CHANNEL"
+        - emoji_on_error: ":sob:"
+        - from_username_on_error: React Native Min App
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+            App Center Android|${APPCENTER_URL_ANDROID}
+            App Center iOS|${APPCENTER_URL_IOS}
+        - pretext: "*:tada: Build Succeeded! :tada:*"
+        - pretext_on_error: "*Oh no, Build Failed! :sob:*"
+        - webhook_url: "$SLACK_WEBHOOK"
+        is_always_run: false
+  build-apps:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "$GOOGLE_SERVICES_JSON" > "$BITRISE_SOURCE_DIR/android/app/google-services.json"
+            echo "google-services.json written successfully."
+        title: 18.0.0 Inject google-services.json
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '21'
+    - install-missing-android-tools@3: {}
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - module: app
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - sign-apk@1:
+        inputs:
+        - use_apk_signer: 'true'
+    - script@1:
+        title: Remove existing pods
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            rm -f ./ios/Podfile.lock
+    - script@1:
+        title: Setup Ruby 3.3.1 with asdf
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            rm -f "$BITRISE_SOURCE_DIR/.ruby-version"
+            unset RBENV_VERSION
+            RUBY_VERSION=3.3.1
+            asdf install ruby $RUBY_VERSION
+            asdf global ruby $RUBY_VERSION
+    - cocoapods-install@2:
+        inputs:
+        - verbose: 'true'
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios"
+    - change-value@2:
+        inputs:
+        - old_value: "{APP_SECRET_VALUE}"
+        - new_value: "$APPCENTER_SECRET_IOS"
+        - show_file: 'true'
+        - file: "./ios/AppCenter-Config.plist"
+        title: Update AppCenter secret iOS
+    - set-xcode-build-number@2:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$IOS_INFO_PLIST"
+    - xcode-archive@5:
+        inputs:
+        - automatic_code_signing: api-key
+        - compile_bitcode: 'no'
+        - upload_bitcode: 'no'
+        - configuration: Release
+        - distribution_method: ad-hoc
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+    - slack@4:
+        inputs:
+        - channel: "$SLACK_CHANNEL"
+        - emoji: ":tada:"
+        - from_username: React Native Min App
+        - footer:
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: "$SLACK_CHANNEL"
+        - emoji_on_error: ":sob:"
+        - from_username_on_error: React Native Min App
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+            App Center Android|${APPCENTER_URL_ANDROID}
+            App Center iOS|${APPCENTER_URL_IOS}
+        - pretext: "*:tada: Build Succeeded! :tada:*"
+        - pretext_on_error: "*Oh no, Build Failed! :sob:*"
+        - webhook_url: "$SLACK_WEBHOOK"
+        is_always_run: false
+  deploy_android_bitrise:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "$GOOGLE_SERVICES_JSON" > "$BITRISE_SOURCE_DIR/android/app/google-services.json"
+            echo "google-services.json written successfully."
+        title: 18.0.0 Inject google-services.json
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '21'
+    - install-missing-android-tools@3: {}
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - gradle-runner@4:
+        inputs:
+        - gradle_task: assembleRelease
+        - build_root_directory: "$BITRISE_SOURCE_DIR/android"
+    - android-build@1:
+        inputs:
+        - module: app
+        - arguments: ''
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+        run_if: false
+    - sign-apk@2:
+        inputs:
+        - use_apk_signer: 'true'
+    - cache-push@2: {}
+    - deploy-to-updraft@0:
+        inputs:
+        - app_key: "$UPDRAFT_APP_KEY"
+        - api_key: "$UPDRAFT_API_KEY"
+        - app_path: "$BITRISE_APK_PATH"
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+  testing-adam:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            GRADLE_PROPS="$BITRISE_SOURCE_DIR/android/gradle.properties"
+            echo "" >> "$GRADLE_PROPS"
+            echo "gitlabMavenToken=$GITLAB_MAVEN_TOKEN" >> "$GRADLE_PROPS"
+            echo "gitlabPipelineId=$GITLAB_PIPELINE_ID" >> "$GRADLE_PROPS"
+            echo "✅ Injected gitlabMavenToken and gitlabPipelineId into gradle.properties"
+        title: 18.0.0 Inject gitlab access token and pipeline id
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+            echo "$GOOGLE_SERVICES_JSON" > "$BITRISE_SOURCE_DIR/android/app/google-services.json"
+            echo "google-services.json written successfully."
+        title: 18.0.0 Write google-services.json
+    - nvm@1:
+        inputs:
+        - node_version: 24.6.0
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '21'
+    - install-missing-android-tools@3.2: {}
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - module: app
+        - arguments: ''
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - script@1:
+        title: Remove existing pods
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            rm -f ./ios/Podfile.lock
+    - script@1:
+        title: Setup Ruby 3.3.1 with asdf
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            rm -f "$BITRISE_SOURCE_DIR/.ruby-version"
+            unset RBENV_VERSION
+            RUBY_VERSION=3.3.1
+            asdf install ruby $RUBY_VERSION
+            asdf global ruby $RUBY_VERSION
+    - cocoapods-install@2:
+        inputs:
+        - verbose: 'true'
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios"
+    - set-xcode-build-number@2:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$IOS_INFO_PLIST"
+    - xcode-archive@5:
+        inputs:
+        - automatic_code_signing: api-key
+        - compile_bitcode: 'no'
+        - upload_bitcode: 'no'
+        - configuration: Release
+        - distribution_method: ad-hoc
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+  test-airship:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set variable isTag
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            DOWNSTREAM_TAG_PATTERN='^v[0-9]+\.[0-9]+(\.[0-9])?-pre\+build+\.[0-9]+$'
+
+            is_downstream=false
+            if [[ "$BITRISE_GIT_TAG" =~ $DOWNSTREAM_TAG_PATTERN ]]; then
+                is_downstream=true
+            fi
+
+            envman add --key IS_DOWNSTREAM_BUILD --value "$is_downstream"
+            echo $is_downstream
+            echo $IS_DOWNSTREAM_BUILD
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |+
+            #!/usr/bin/env bash
+
+            # first delete package-lock.json file to avoid issue when the locked versions are of different architecture e.g. arm64 M1 chip but CI is amd
+            # rm -f package-lock.json
+
+            # first do a normal npm install
+            npm install
+
+            # if this is a downstream build from a tag, fetch plugin version from that tag
+            NPM_INSTALL_PARAM=
+            if "$IS_DOWNSTREAM_BUILD" = "true"; then
+                NPM_INSTALL_PARAM="git+ssh://git@github.com/Bluedot-Innovation/Bluedot-React-Native-Plugin.git#$BITRISE_GIT_TAG"
+                echo $NPM_INSTALL_PARAM
+                npm install $NPM_INSTALL_PARAM
+            fi
+
+
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # If Main app, version is from app.json file, version is nested in
+            expo map
+
+            # If Downstream build, use version from plugin's package.json file,
+            version is at the root map\ 
+
+            VERSION_FIELD=.expo.version
+
+            VERSION_JSON_FILE=$MAIN_VERSION_JSON_FILE
+
+
+            # If need to use Plugin's version for the Main App, uncomment the if
+            condition below
+
+            #if \"$IS_DOWNSTREAM_BUILD\" = \"true\"; then
+
+            #    VERSION_FIELD=.version
+
+            #    VERSION_JSON_FILE=$PLUGIN_VERSION_JSON_FILE
+
+            #fi
+
+
+
+            NPM_PACKAGE_VERSION=$(cat \"$VERSION_JSON_FILE\" | jq -r
+            \"$VERSION_FIELD\")
+
+
+            echo \"Found package version: ${NPM_PACKAGE_VERSION}\"
+
+
+            envman add --key NPM_PACKAGE_VERSION --value
+            \"${NPM_PACKAGE_VERSION}\""
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            SEDOPTION="-i"
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+              SEDOPTION="-i ''"
+            fi
+
+            USE_PLUGIN_RELEASE_NOTES=false
+            if "$IS_DOWNSTREAM_BUILD" = "true" && test -f "$PLUGIN_RELEASE_NOTES_FILE"; then
+                USE_PLUGIN_RELEASE_NOTES=true
+            fi
+
+            if [ "$USE_PLUGIN_RELEASE_NOTES" = true ]; then
+                echo 'Use Plugin Release Notes'
+                # insert a note saying this is a Downstream build
+                sed $SEDOPTION "1s/^/Downstream build, plugin version: \`$NPM_PACKAGE_VERSION\` \n&/" "$PLUGIN_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $PLUGIN_RELEASE_NOTES_FILE
+            else
+                echo 'Use Main App Release Notes'
+                sed $SEDOPTION "1s/^/Min App build version: \`$NPM_PACKAGE_VERSION\` \n&/" "$APP_RELEASE_NOTES_FILE"
+                envman add --key RELEASE_NOTES --valuefile $APP_RELEASE_NOTES_FILE
+            fi
+
+            echo $RELEASE_NOTES
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '17'
+    - install-missing-android-tools@3: {}
+    - generate-text-file@0:
+        inputs:
+        - file_name: airshipconifg.properties
+        - file_content: |
+            developmentAppKey = WINnTbl5QWqyOVNBi6GQlQ
+            developmentAppSecret = 1LaSJUsFQUuKX41Y4By4kQ
+            productionAppKey = WINnTbl5QWqyOVNBi6GQlQ
+            productionAppSecret = 1LaSJUsFQUuKX41Y4By4kQ
+            site = EU
+            fcmEnabled = true
+    - file-downloader@1:
+        inputs:
+        - source: "$BITRISEIO_GOOGLE_SERVICE_JSON_URL"
+        - destination: "./android/app/google-services.json"
+    - file-downloader@1:
+        inputs:
+        - source: "$BITRISEIO_AIRSHIP_CONFIG_URL"
+        - destination: "./android/app/src/main/assets/airshipconfig.properties"
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            # fail if any commands fails
+            set -e
+            # make pipelines' return status equal the last command to exit with a non-zero status, or zero if all commands exit successfully
+            set -o pipefail
+            # debug log
+            set -x
+
+            cd $BITRISE_SOURCE_DIR
+            rm -rf android/.cxx android/build android/app/build
+
+            cd $BITRISE_SOURCE_DIR/android
+            ./gradlew clean \
+                generateAutolinkingPackageList \
+                generateCodegenArtifactsFromSchema \
+                -PnewArchEnabled=true
+            # or run a script from your repository, like:
+            # bash ./path/to/script.sh
+            # not just bash, e.g.:
+            # ruby ./path/to/script.rb
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - module: app
+        - variant: release
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+        - arguments: "-PnewArchEnabled=true"
+    - sign-apk@1:
+        inputs:
+        - use_apk_signer: 'true'
+    - script@1:
+        title: Remove existing pods
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            rm -f ./ios/Podfile.lock
+        is_always_run: true
+    - script@1:
+        title: Setup Ruby 3.4.5 with asdf
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            rm -f "$BITRISE_SOURCE_DIR/.ruby-version"
+            unset RBENV_VERSION
+            RUBY_VERSION=3.4.5
+            asdf install ruby $RUBY_VERSION
+            asdf global ruby $RUBY_VERSION
+        is_always_run: true
+    - cocoapods-install@3:
+        inputs:
+        - verbose: 'true'
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios"
+        is_always_run: true
+    - change-value@2:
+        inputs:
+        - old_value: "{APP_SECRET_VALUE}"
+        - new_value: "$APPCENTER_SECRET_IOS"
+        - show_file: 'true'
+        - file: "./ios/AppCenter-Config.plist"
+        title: Update AppCenter secret iOS
+        is_always_run: true
+    - set-xcode-build-number@2:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$IOS_INFO_PLIST"
+        is_always_run: true
+    - xcode-archive@6:
+        inputs:
+        - automatic_code_signing: api-key
+        - compile_bitcode: 'no'
+        - upload_bitcode: 'no'
+        - configuration: Release
+        - distribution_method: ad-hoc
+        is_always_run: true
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+    - slack@4:
+        inputs:
+        - channel: "$SLACK_CHANNEL"
+        - emoji: ":tada:"
+        - from_username: React Native Min App
+        - footer:
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: "$SLACK_CHANNEL"
+        - emoji_on_error: ":sob:"
+        - from_username_on_error: React Native Min App
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+            App Center Android|${APPCENTER_URL_ANDROID}
+            App Center iOS|${APPCENTER_URL_IOS}
+        - pretext: "*:tada: Build Succeeded! :tada:*"
+        - pretext_on_error: "*Oh no, Build Failed! :sob:*"
+        - webhook_url: "$SLACK_WEBHOOK"
+        is_always_run: false
+  min-app-xcode-27:
+    description: Build the React Native Minimal App for TestFlight with Xcode 27.
+    meta:
+      bitrise.io:
+        stack: osx-xcode-27.0.x-edge
+        machine_type_id: g2.mac.medium
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Run npm install
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            npm install
+    - script@1:
+        title: Extract NPM version
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            npm_package_version=$(jq -r '.expo.version' "$MAIN_VERSION_JSON_FILE")
+            if [[ -z "$npm_package_version" || "$npm_package_version" == "null" ]]; then
+              echo "Could not extract the app version from $MAIN_VERSION_JSON_FILE"
+              exit 1
+            fi
+
+            echo "Found package version: $npm_package_version"
+            envman add --key NPM_PACKAGE_VERSION --value "$npm_package_version"
+    - script@1:
+        title: Parse Release notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            envman add --key RELEASE_NOTES --valuefile "$APP_RELEASE_NOTES_FILE"
+            echo "Using main app release notes"
+    - nvm@1:
+        inputs:
+        - node_version: 24.11.0
+    - script@1:
+        title: Setup Ruby 3.4.5 with asdf
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            rm -f "$BITRISE_SOURCE_DIR/.ruby-version"
+            unset RBENV_VERSION
+            asdf install ruby 3.4.5
+            asdf global ruby 3.4.5
+    - cocoapods-install@3:
+        inputs:
+        - verbose: 'true'
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios"
+    - set-xcode-build-number@2:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$IOS_INFO_PLIST"
+    - xcode-archive@6:
+        title: Archive for TestFlight
+        inputs:
+        - project_path: "$BITRISE_PROJECT_PATH"
+        - scheme: "$BITRISE_SCHEME"
+        - automatic_code_signing: api-key
+        - compile_bitcode: 'no'
+        - upload_bitcode: 'no'
+        - configuration: Release
+        - distribution_method: app-store
+    - deploy-to-itunesconnect-deliver@2:
+        title: Deploy to TestFlight
+        inputs:
+        - connection: api_key
+        - app_id: "$APPSTORE_ID"
+        - distribute_external: 'no'
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+    - slack@4:
+        inputs:
+        - channel: "$SLACK_CHANNEL"
+        - emoji: ':tada:'
+        - from_username: React Native Min App
+        - footer: ''
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: "$SLACK_CHANNEL"
+        - emoji_on_error: ':sob:'
+        - from_username_on_error: React Native Min App
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+        - pretext: '*:tada: React Native Min App Xcode 27 TestFlight Build Succeeded! :tada:*'
+        - pretext_on_error: '*Oh no, React Native Min App Xcode 27 Build Failed! :sob:*'
+        - webhook_url: "$SLACK_WEBHOOK"
+meta:
+  bitrise.io:
+    stack: osx-xcode-26.2.x
+app:
+  envs:
+  - opts:
+      is_expand: false
+    APPCENTER_APP_NAME_IOS: BDReactNativeIntegration
+  - opts:
+      is_expand: false
+    APPCENTER_DISTRIBUTION_GROUPS: Collaborators
+  - opts:
+      is_expand: false
+    APPCENTER_OWNER: bluedot
+  - opts:
+      is_expand: false
+    SLACK_CHANNEL: "@danny"
+  - opts:
+      is_expand: false
+    APPCENTER_APP_NAME_ANDROID: BDReactNativeIntegration-1
+  - opts:
+      is_expand: false
+    GRADLEW_PATH: "./android/gradlew"
+  - opts:
+      is_expand: false
+    BITRISE_PROJECT_PATH: "./ios/RNPointSDKMinimalIntegration.xcworkspace"
+  - opts:
+      is_expand: false
+    BITRISE_SCHEME: RNPointSDKMinimalIntegration
+  - opts:
+      is_expand: false
+    IOS_INFO_PLIST: "./ios/RNPointSDKMinimalIntegration/Info.plist"
+  - opts:
+      is_expand: false
+    PLUGIN_RELEASE_NOTES_FILE: "./node_modules/bluedot-react-native/ReleaseNotes.md"
+  - opts:
+      is_expand: false
+    APP_RELEASE_NOTES_FILE: "./ReleaseNotes.md"
+  - opts:
+      is_expand: false
+    MAIN_VERSION_JSON_FILE: "./app.json"
+  - opts:
+      is_expand: false
+    PLUGIN_VERSION_JSON_FILE: "./node_modules/bluedot-react-native/package.json"
+  - GRADLE_OPTS: "-Xmx4096m"
+    opts:
+      is_expand: false
+trigger_map:
+- push_branch: release/*
+  type: push
+  workflow: deploy_testflight_and_googleplay
+- pull_request_source_branch: "*"
+  type: pull_request
+  workflow: testing
