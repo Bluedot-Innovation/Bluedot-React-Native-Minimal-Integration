@@ -41,10 +41,19 @@ export default function App() {
 
     // Listen for push notification tap/display events from Bluedot campaigns
 
+    // Payload keys are consistent across platforms; on iOS `body`, `pushVersion` and `data` are null.
     const receivedSub = PushNotifications.on(
       PushNotifications.PUSH_NOTIFICATION_RECEIVED,
       (data) => {
-        console.log('[Bluedot] Push notification received:', data.title, data.campaignId);
+        console.log('[Bluedot] Push notification received:', {
+          title: data.title,
+          body: data.body,
+          pushVersion: data.pushVersion,
+          campaignId: data.campaignId,
+          zoneId: data.zoneId,
+          notificationId: data.notificationId,
+          data: data.data,
+        });
         showPushMessage(data.title || 'Notification received', data.body || data.title);
       }
     );
@@ -52,7 +61,12 @@ export default function App() {
     const clickedSub = PushNotifications.on(
         PushNotifications.PUSH_NOTIFICATION_CLICKED,
         (data) => {
-          console.log('[Bluedot] Push notification clicked:', data.title, data.campaignId);
+          console.log('[Bluedot] Push notification clicked:', {
+            title: data.title,
+            campaignId: data.campaignId,
+            zoneId: data.zoneId,
+            notificationId: data.notificationId,
+          });
           showPushMessage(data.title || 'Notification clicked', data.body || data.title);
         }
       );

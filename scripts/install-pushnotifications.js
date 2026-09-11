@@ -13,7 +13,7 @@ const path = require('path');
 const os = require('os');
 
 const REPO = 'git@github.com:Bluedot-Innovation/Bluedot-React-Native-Plugin.git';
-const BRANCH = 'dev/push';
+const BRANCH = 'release/3.5.0';
 const SUBDIR = 'bluedot-react-native-pushnotifications';
 const TARGET = path.resolve(__dirname, '..', 'node_modules', SUBDIR);
 
