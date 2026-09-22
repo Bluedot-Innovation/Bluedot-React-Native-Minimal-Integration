@@ -24,6 +24,10 @@ export default function Main() {
       console.log(JSON.stringify(event))
     });
 
+    BluedotPointSdk.unsubscribe("dwellZone", (event) => {
+      console.log(JSON.stringify(event))
+    });
+
     BluedotPointSdk.unsubscribe("zoneInfoUpdate", () => {
     });
 
@@ -78,9 +82,9 @@ export default function Main() {
       <View>
         <Button title="Geo-triggering" onPress={() => navigate('/geotriggering')}/>
         <Button title="Tempo" onPress={() => navigate('/tempo')}/>
-        <Button title="Brain Ai" onPress={() => navigate('/brainai')}/>
         <Button title="Reset SDK" onPress={handleResetSdk}/>
       </View>
+
     </View>
   );
 }

@@ -61,10 +61,16 @@ export default function Initialize() {
       console.log(`exited: ${JSON.stringify(event)}`);
     });
 
+    BluedotPointSdk.on("dwellZone", (event) => {
+      const message = `You have dwelled in ${event.zoneInfo.name}`;
+      sendLocalNotification(message);
+      console.log(`dwelled: ${JSON.stringify(event)}`);
+    });
+
     BluedotPointSdk.on("zoneInfoUpdate", () => {
       // zoneInfoUpdate callback no longer returns zoneInfos, query it directly from the SDK
       BluedotPointSdk.getZonesAndFences().then((zoneInfos) => {
-        if (zoneInfos != null) {
+        if (Array.isArray(zoneInfos)) {
           const message = `Did Update ZoneInfo ${JSON.stringify(zoneInfos)}`;
           console.log(message);
           console.log(JSON.stringify(zoneInfos))
