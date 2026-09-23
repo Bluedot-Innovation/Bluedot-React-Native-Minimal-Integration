@@ -17,7 +17,9 @@
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
 
-  //  return YES;
+  // Under the UIScene lifecycle the window belongs to the scene, so RCTAppDelegate must not
+  // build one here. SceneDelegate creates the window and starts React Native on it.
+  self.automaticallyLoadReactNativeWindow = NO;
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
