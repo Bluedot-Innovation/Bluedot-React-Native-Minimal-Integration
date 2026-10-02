@@ -19,7 +19,7 @@
     "@react-native/babel-preset": "0.83.0",
     "@react-native/gradle-plugin": "0.83.0",
     "@react-native/metro-config": "0.83.0",
-    "bluedot-react-native": "file:bluedot-react-native-4.0.0-alpha2.tgz",
+    "bluedot-react-native": "file:bluedot-react-native-4.0.0-alpha5.tgz",
     "bluedot-react-native-pushnotifications": "file:bluedot-react-native-pushnotifications-1.0.0.tgz",
     "expo": "55.0.4",
     "expo-application": "~55.0.8",

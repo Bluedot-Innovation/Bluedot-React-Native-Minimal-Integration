@@ -10,6 +10,25 @@ if (localPropertiesFile.exists()) {
     localProperties.each { key, value -> project.ext.set(key as String, value) }
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        mavenLocal()
+        maven { url 'https://jitpack.io' }
+        maven {
+            url "https://gitlab.com/api/v4/projects/14682665/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name "Private-Token"
+                value project.findProperty("gitlabPrivateToken") ?: ""
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
+}
+
 buildscript {
     ext {
         buildToolsVersion = "36.0.0"
