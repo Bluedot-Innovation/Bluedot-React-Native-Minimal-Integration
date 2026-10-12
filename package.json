@@ -1,6 +1,6 @@
 {
   "_TODO": "bluedot-react-native and bluedot-react-native-pushnotifications are temporarily installed from the ak/BD-8386 branch of Bluedot-React-Native-Plugin (git) instead of npm, since they are not yet published. Once QA passes and the plugins are released to npmjs, replace the git dependency for bluedot-react-native with the published version, remove the postinstall call to scripts/install-pushnotifications.js, and delete that script.",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
