@@ -101,6 +101,11 @@ export default function Initialize() {
       });
     });
 
+    BluedotPointSdk.on("tempoTrackingStoppedWithError", (event) => {
+      sendLocalNotification(`Tempo stopped: ${event.error}`);
+      console.log(`Tempo stopped: ${JSON.stringify(event)}`);
+    });
+
     BluedotPointSdk.on(
       "lowPowerModeDidChange",
       (event) => console.log(JSON.stringify(event))

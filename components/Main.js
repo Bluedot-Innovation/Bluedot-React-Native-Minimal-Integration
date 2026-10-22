@@ -31,6 +31,8 @@ export default function Main() {
     BluedotPointSdk.unsubscribe("zoneInfoUpdate", () => {
     });
 
+    BluedotPointSdk.unsubscribe("tempoTrackingStoppedWithError");
+
     BluedotPointSdk.unsubscribe(
       "lowPowerModeDidChange",
       (event) => console.log(JSON.stringify(event))
