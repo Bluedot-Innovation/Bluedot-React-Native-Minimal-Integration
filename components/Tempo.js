@@ -3,6 +3,7 @@ import BluedotPointSdk from "bluedot-react-native";
 import { Text, View, Button, TextInput } from "react-native";
 import { useNavigate } from "react-router"
 import styles from "../styles";
+import { startForegroundService, stopForegroundService } from "./foregroundService";
 
 export default function Tempo({ hasStarted }) {
   const [destinationId, setDestinationId] = useState("");
@@ -31,31 +32,25 @@ export default function Tempo({ hasStarted }) {
       customerName: "Customer"
     })
 
-      const androidNotificationParams = {
-        channelId: 'Bluedot React',
-        channelName: 'Bluedot React',
-        title: 'Bluedot Foreground Service - Tempo',
-        content: "This app is running a foreground service using location services"
-      }
-
-      tempoBuilder
-        .androidNotification( // Required to run Tempo in Android
-          androidNotificationParams.channelId,
-          androidNotificationParams.channelName,
-          androidNotificationParams.title,
-          androidNotificationParams.content
+      // Tempo fails to start on Android unless a foreground service is linked.
+      startForegroundService()
+        .then(() =>
+          tempoBuilder.start(
+            destinationId.trim(),
+            onStartTempoSuccess,
+            onStartTempoFailed
+          )
         )
-        .start(
-          destinationId.trim(),
-          onStartTempoSuccess,
-          onStartTempoFailed
-        )
+        .catch(onStartTempoFailed)
   }
 
   function handleStopTempo() {
     function onStopTempoSuccess() {
         console.log('Tempo has stopped successfuly')
         BluedotPointSdk.isTempoRunning().then(setIsTempoRunning)
+        BluedotPointSdk.isGeoTriggeringRunning().then((isGeoTriggeringRunning) => {
+          if (!isGeoTriggeringRunning) stopForegroundService();
+        });
       }
     
       function onStopTempoFailed(error) {
