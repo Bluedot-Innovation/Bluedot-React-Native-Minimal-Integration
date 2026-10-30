@@ -108,7 +108,7 @@ android {
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "3.5.0"
+        versionName "4.0.0"
     }
 
     splits {
@@ -177,10 +177,9 @@ dependencies {
     // DEV - to load a package from plugin subfolder we clone plugin's repo and install it as android dependency - to be removed in production
     implementation project(':bluedot-react-native-pushnotifications') 
 
-    // Optional - only use next four declarations when you want to use your own implementation of FirebaseMessagingService.
-    // Otherwise the default implementation provided by the bluedot-react-native-pushnotifications package will be used.
-    implementation 'com.gitlab.bluedotio.android:point_sdk_push:18.0.0'
-    implementation 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
+    // Official, publicly released Bluedot Point SDK artifacts.
+    implementation "com.gitlab.bluedotio.android:point_sdk_push:${pointSdkVersion}"
+    implementation "com.gitlab.bluedotio.android:point_sdk_android:${pointSdkVersion}"
     implementation platform("com.google.firebase:firebase-bom:34.12.0")
     implementation "com.google.firebase:firebase-messaging"
 
