@@ -21,6 +21,7 @@
     "@react-native/gradle-plugin": "0.83.0",
     "@react-native/metro-config": "0.83.0",
     "bluedot-react-native": "^4.0.0",
+    "bluedot-react-native-pushnotifications": "^1.0.0",
     "expo": "55.0.4",
     "expo-application": "~55.0.8",
     "expo-constants": "~55.0.7",
