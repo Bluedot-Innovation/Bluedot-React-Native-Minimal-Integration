@@ -10,7 +10,7 @@ import Initilize from "./components/InitializeSdk";
 import Main from "./components/Main";
 import GeoTriggering from "./components/GeoTriggering";
 import Tempo from "./components/Tempo";
-import PushNotifications from "./components/PushNotifications";
+import PushNotifications from "react-native-push-notification";
 
 // If you implement Firebase on the React Native layer, forward background/quit-state FCM messages to the Bluedot Push SDK.
 // Call this once at the module level (outside any component):
