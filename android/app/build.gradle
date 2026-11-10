@@ -174,9 +174,6 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
-    // DEV - to load a package from plugin subfolder we clone plugin's repo and install it as android dependency - to be removed in production
-    implementation project(':bluedot-react-native-pushnotifications') 
-
     // Official, publicly released Bluedot Point SDK artifacts.
     implementation "com.gitlab.bluedotio.android:point_sdk_push:${pointSdkVersion}"
     implementation "com.gitlab.bluedotio.android:point_sdk_android:${pointSdkVersion}"
