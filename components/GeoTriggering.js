@@ -5,7 +5,7 @@ import BluedotPointSdk from "bluedot-react-native";
 import styles from "../styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OS } from "../enums";
-import { startForegroundService, stopForegroundService } from "./foregroundService";
+import { startForegroundService, stopForegroundService, stopForegroundServiceIfIdle } from "./foregroundService";
 
 export default function GeoTriggering() {
 
@@ -63,13 +63,21 @@ export default function GeoTriggering() {
 
   const handleStartGeotriggeringWithAndroidNotification = () => {
     const onSuccessCallback = () => setIsGeotriggeringRunning(true);
-    const onFailCallback = (error) => setError(error);
+    const onFailCallback = (error) => {
+      setError(error);
+      // Tear down the service when the SDK rejects the start so no orphan
+      // notification remains while neither tracker is running.
+      stopForegroundServiceIfIdle();
+    };
 
     // Start and link the app's foreground service first so the ongoing
     // notification is shown and GeoTriggering runs in high-accuracy mode.
     startForegroundService()
       .then(() => geoTriggeringBuilder.start(onSuccessCallback, onFailCallback))
-      .catch((e) => setError(e.message));
+      .catch((e) => {
+        setError(e.message);
+        stopForegroundServiceIfIdle();
+      });
   };
 
   const handleStopGeotriggering = () => {

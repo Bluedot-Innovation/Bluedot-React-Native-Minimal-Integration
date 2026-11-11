@@ -3,6 +3,7 @@ import { Text, View, Button } from "react-native";
 import { useNavigate } from "react-router"
 import BluedotPointSdk from "bluedot-react-native";
 import styles from "../styles";
+import { stopForegroundService } from "./foregroundService";
 
 export default function Main() {
   const navigate = useNavigate()
@@ -53,6 +54,9 @@ export default function Main() {
   const handleResetSdk = () => {
     const onSuccess = () => {
       unsubscribeBluedotListeners()
+      // Reset stops tracking in the SDK, so stop the app-owned foreground
+      // service too, otherwise its ongoing notification would keep running.
+      stopForegroundService()
       navigate('/');
     }
 
