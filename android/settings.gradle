@@ -17,6 +17,4 @@ extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autoli
 expoAutolinking.useExpoModules()
 rootProject.name = 'RNPointSDKMinimalIntegration'
 include ':app'
-include ':bluedot-react-native-pushnotifications'
-project(':bluedot-react-native-pushnotifications').projectDir = new File(rootProject.projectDir, '../node_modules/bluedot-react-native-pushnotifications/android')
 includeBuild('../node_modules/@react-native/gradle-plugin')

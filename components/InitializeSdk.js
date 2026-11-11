@@ -3,6 +3,7 @@ import BluedotPointSdk from "bluedot-react-native";
 import { useNavigate } from "react-router";
 import { Button, Text, TextInput, View, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { sendLocalNotification } from "../helpers/notifications";
+import { stopForegroundServiceIfIdle } from "./foregroundService";
 import styles from "../styles";
 
 const PROJECTID = "YOUR_PROJECT_ID_GOES_HERE";
@@ -99,6 +100,14 @@ export default function Initialize() {
           });
         }
       });
+    });
+
+    BluedotPointSdk.on("tempoTrackingStoppedWithError", (event) => {
+      sendLocalNotification(`Tempo stopped: ${event.error}`);
+      console.log(`Tempo stopped: ${JSON.stringify(event)}`);
+      // Tempo stopped itself via the SDK, so the app-owned foreground service is
+      // still running. Tear it down once neither tracker is active.
+      stopForegroundServiceIfIdle();
     });
 
     BluedotPointSdk.on(

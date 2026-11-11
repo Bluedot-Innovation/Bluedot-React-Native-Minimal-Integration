@@ -5,6 +5,7 @@ import BluedotPointSdk from "bluedot-react-native";
 import styles from "../styles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OS } from "../enums";
+import { startForegroundService, stopForegroundService, stopForegroundServiceIfIdle } from "./foregroundService";
 
 export default function GeoTriggering() {
 
@@ -45,9 +46,6 @@ export default function GeoTriggering() {
     
     retrieveBackgroundLocationStatus();
 
-    // Set a resourceID so notification icon can show up in Android 12 (Lollipop) and later
-    BluedotPointSdk.setNotificationIdResourceId("ic_notification");
-
   }, []);
 
   const handleStartGeotriggering = () => {
@@ -65,31 +63,30 @@ export default function GeoTriggering() {
 
   const handleStartGeotriggeringWithAndroidNotification = () => {
     const onSuccessCallback = () => setIsGeotriggeringRunning(true);
-    const onFailCallback = (error) => setError(error);
-
-    const androidNotificationParams = {
-      channelId: "Bluedot React",
-      channelName: "Bluedot React",
-      title: "Bluedot Foreground Service - Geo-triggering",
-      content:
-        "This app is running a foreground service using location services",
-      notificationId: 123,
+    const onFailCallback = (error) => {
+      setError(error);
+      // Tear down the service when the SDK rejects the start so no orphan
+      // notification remains while neither tracker is running.
+      stopForegroundServiceIfIdle();
     };
 
-    geoTriggeringBuilder
-      .androidNotification(
-        androidNotificationParams.channelId,
-        androidNotificationParams.channelName,
-        androidNotificationParams.title,
-        androidNotificationParams.content,
-        androidNotificationParams.notificationId
-      )
-      .start(onSuccessCallback, onFailCallback);
+    // Start and link the app's foreground service first so the ongoing
+    // notification is shown and GeoTriggering runs in high-accuracy mode.
+    startForegroundService()
+      .then(() => geoTriggeringBuilder.start(onSuccessCallback, onFailCallback))
+      .catch((e) => {
+        setError(e.message);
+        stopForegroundServiceIfIdle();
+      });
   };
 
   const handleStopGeotriggering = () => {
     function onSuccessCallback() {
       setIsGeotriggeringRunning(false);
+      // Stopping the service unlinks it, which would also stop Tempo.
+      BluedotPointSdk.isTempoRunning().then((isTempoRunning) => {
+        if (!isTempoRunning) stopForegroundService();
+      });
     }
     function onFailCallback(error) {
       setError(error);
